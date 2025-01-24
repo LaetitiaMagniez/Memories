@@ -1,23 +1,25 @@
-import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:memories_project/authentification/auth_gate.dart';
-import 'package:memories_project/authentification/updateProfile.dart';
+import 'package:memories_project/user/updateProfile.dart';
+import 'package:memories_project/user/profile.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({Key? key}) : super(key: key);
 
   Future<void> _signOut(BuildContext context) async {
     try {
       await FirebaseAuth.instance.signOut();
       // Naviguez vers l'écran de connexion après la déconnexion
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => AuthGate()),
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => const AuthGate()),
+        (Route<dynamic> route) => false,
       );
     } catch (e) {
       print("Erreur lors de la déconnexion : $e");
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur lors de la déconnexion')),
+        const SnackBar(content: Text('Erreur lors de la déconnexion')),
       );
     }
   }
@@ -26,46 +28,55 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.person),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute<ProfileScreen>(
-                  builder: (context) => ProfileScreen(
-                    appBar: AppBar(
-                      title: const Text('Mon profil'),
-                      backgroundColor: Color.fromARGB(200, 179, 147, 234),
-                    ),
-                    actions: [
-                      SignedOutAction((context) {
-                        Navigator.of(context).pop();
-                      })
-                    ],
-                    children: [
-                      const Divider(),
-                      Padding(
-                        padding: const EdgeInsets.all(2),
-                        child: LayoutBuilder(
-                          builder: (context, constraints) {
-                            return ConstrainedBox(
-                              constraints: BoxConstraints(
-                                maxWidth: constraints.maxWidth * 0.5,
-                              ),                              
-                            );
-                          },
+            actions: [
+              StreamBuilder<DocumentSnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(FirebaseAuth.instance.currentUser?.uid)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData && snapshot.data != null) {
+                    final userData = snapshot.data!.data() as Map<String, dynamic>?;
+                    final profileImageUrl = userData?['profilePicture'] as String?;
+                    
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute<void>(
+                            builder: (context) => const ProfilePage(),
+                          ),
+                        );
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: CircleAvatar(
+                          backgroundImage: profileImageUrl != null
+                              ? NetworkImage(profileImageUrl)
+                              : null,
+                          child: profileImageUrl == null
+                              ? const Icon(Icons.person)
+                              : null,
                         ),
                       ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          )
-        ],
-        automaticallyImplyLeading: false,
-      ),
+                    );
+                  }
+                  return IconButton(
+                    icon: const Icon(Icons.person),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute<void>(
+                          builder: (context) => const ProfilePage(),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ],
+            automaticallyImplyLeading: false,
+          ),
       body: SingleChildScrollView(
         child: Center(
           child: Column(
@@ -78,26 +89,26 @@ class HomeScreen extends StatelessWidget {
               ),
               Text(
                 'Welcome!',
-                style: Theme.of(context).textTheme.displaySmall,
+                style: Theme.of(context).textTheme.headlineMedium,
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => UpdateProfilePage()),
+                    MaterialPageRoute(builder: (context) => const UpdateProfilePage()),
                   );
                 },
-                child: Text('Mettre à jour le profil'),
+                child: const Text('Mettre à jour le profil'),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () => _signOut(context),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color.fromARGB(255, 138, 87, 220),
-                  foregroundColor:  Colors.white
+                  foregroundColor: Colors.white,
                 ),
-                child: Text('Déconnexion'),
+                child: const Text('Déconnexion'),
               ),
             ],
           ),

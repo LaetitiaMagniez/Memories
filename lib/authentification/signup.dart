@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'updateProfile.dart';
+import 'package:memories_project/transition/creationLoading.dart';
+import 'package:memories_project/user/profile.dart';
 
 
 class SignUpPage extends StatefulWidget {
@@ -15,16 +16,18 @@ class _SignUpPageState extends State<SignUpPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
 
   bool _isLoading = false;
-  bool _isPasswordVisible = false; // Nouvelle variable pour l'œil
+  bool _isPasswordVisible = false;
+  bool _isConfirmPasswordVisible = false; 
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
 Future<void> _signUp() async {
   if (_formKey.currentState!.validate()) {
-    setState(() {
-      _isLoading = true;
-    });
+    Navigator.of(context).push(MaterialPageRoute(
+    builder: (context) => CreationLoadingPage(),
+  ));
 
     try {
       // Créer l'utilisateur avec Firebase Auth
@@ -47,7 +50,7 @@ Future<void> _signUp() async {
         );
         // Naviguer vers une autre page ou réinitialiser les champs
       Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => UpdateProfilePage()),
+        MaterialPageRoute(builder: (context) => ProfilePage()),
         (Route<dynamic> route) => false,
       );
     } on FirebaseAuthException catch (e) {
@@ -78,7 +81,7 @@ Future<void> _signUp() async {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Pas encore de compte ? inscrivez vous'),
+        title: Text('Pas encore de compte ? Inscrivez-vous'),
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
@@ -102,33 +105,63 @@ Future<void> _signUp() async {
               ),
               SizedBox(height: 16.0),
               TextFormField(
-                controller: _passwordController,
-                decoration: InputDecoration(
-                  labelText: 'Mot de passe',
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _isPasswordVisible
-                          ? Icons.visibility
-                          : Icons.visibility_off,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _isPasswordVisible = !_isPasswordVisible;
-                      });
-                    },
+              controller: _passwordController,
+              decoration: InputDecoration(
+                labelText: 'Mot de passe',
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _isPasswordVisible
+                        ? Icons.visibility
+                        : Icons.visibility_off,
                   ),
+                  onPressed: () {
+                    setState(() {
+                      _isPasswordVisible = !_isPasswordVisible;
+                    });
+                  },
                 ),
-                obscureText: !_isPasswordVisible, // Masquer ou afficher le texte
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return "Veuillez entrer un mot de passe.";
-                  }
-                  if (value.length < 6) {
-                    return "Le mot de passe doit contenir au moins 6 caractères.";
-                  }
-                  return null;
-                },
               ),
+              obscureText: !_isPasswordVisible,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return "Veuillez entrer un mot de passe.";
+                }
+                if (value.length < 6) {
+                  return "Le mot de passe doit contenir au moins 6 caractères.";
+                }
+                return null;
+              },
+              ),
+              SizedBox(height: 16.0),
+              TextFormField(
+              controller: _confirmPasswordController,
+              decoration: InputDecoration(
+                labelText: 'Confirmer votre mot de passe',
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _isConfirmPasswordVisible
+                        ? Icons.visibility
+                        : Icons.visibility_off,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
+                    });
+                  },
+                ),
+              ),
+              obscureText: !_isConfirmPasswordVisible,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return "Veuillez confirmer votre mot de passe.";
+                }
+                if (value != _passwordController.text) {
+                  return "Les mots de passe ne correspondent pas.";
+                }
+                return null;
+              },
+              ),
+
               SizedBox(height: 24),
               _isLoading
                   ? Center(child: CircularProgressIndicator())

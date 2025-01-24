@@ -39,7 +39,7 @@ class _AuthGateState extends State<AuthGate> with SingleTickerProviderStateMixin
               controller: _tabController,
               tabs: const [
                 Tab(text: 'Connexion'),
-                Tab(text: "S'inscrire"),
+                Tab(text: 'Inscription'),
               ],
             ),
           ),

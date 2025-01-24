@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:memories_project/password/forgottenPassword.dart';
 import 'package:memories_project/home.dart';
 
 class Login extends StatefulWidget {
@@ -148,9 +149,10 @@ class _LoginState extends State<Login> {
                       ),
                   TextButton(
                     onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Fonctionnalité de mot de passe oublié à implémenter.')),
-                      );
+                      Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => ForgottenPasswordPage()),
+                  );
                     },
                     child: Text('Mot de passe oublié ?'),
                   ),

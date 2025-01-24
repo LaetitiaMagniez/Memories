@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:memories_project/password/resetPassword.dart';
 import 'authentification/auth_gate.dart';
 
+
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(
-        primarySwatch: Colors.lightBlue,
+      home: Stack(
+        children: [
+          AuthGate(), // Votre page principale
+          ResetPasswordHandler(), // Pour intercepter les liens
+        ],
       ),
-      home: const AuthGate(),
     );
   }
 }

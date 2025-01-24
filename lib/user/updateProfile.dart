@@ -64,7 +64,7 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
         if (_selectedImage != null) {
           final storageRef = FirebaseStorage.instance
               .ref()
-              .child('user_icons/${user.uid}.jpg');
+              .child('user_images/${user.uid}.jpg');
           await storageRef.putFile(_selectedImage!);
           imageUrl = await storageRef.getDownloadURL();
         }
