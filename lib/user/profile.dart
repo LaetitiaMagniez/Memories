@@ -5,12 +5,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:image_cropper/image_cropper.dart';
-import 'package:memories_project/transition/deletetionLoading.dart';
+import 'package:memories_project/home.dart';
+import 'package:memories_project/transition/loadingScreen.dart';
 
 import '../authentification/auth_gate.dart';
 
 class ProfilePage extends StatefulWidget {
-  const ProfilePage({Key? key}) : super(key: key);
+  const ProfilePage({super.key});
 
   @override
   _ProfilePageState createState() => _ProfilePageState();
@@ -215,7 +216,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> _deleteAccount() async {
   
   Navigator.of(context).push(MaterialPageRoute(
-    builder: (context) => DeletionLoadingPage(),
+    builder: (context) => LoadingScreen(message:'Suppression du compte en cours'),
   ));
   
   try {
@@ -256,7 +257,11 @@ class _ProfilePageState extends State<ProfilePage> {
         title: const Text('Profil'),
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const HomeScreen()),
+                  )
+                ,
         ),
         actions: [
           IconButton(

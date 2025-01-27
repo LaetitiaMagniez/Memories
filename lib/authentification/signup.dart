@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:memories_project/transition/creationLoading.dart';
+import 'package:memories_project/transition/loadingScreen.dart';
 import 'package:memories_project/user/profile.dart';
 
 
@@ -26,7 +26,7 @@ class _SignUpPageState extends State<SignUpPage> {
 Future<void> _signUp() async {
   if (_formKey.currentState!.validate()) {
     Navigator.of(context).push(MaterialPageRoute(
-    builder: (context) => CreationLoadingPage(),
+    builder: (context) => LoadingScreen(message: 'Création de votre compte'),
   ));
 
     try {

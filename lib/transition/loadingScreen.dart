@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 
-class CreationLoadingPage extends StatelessWidget {
+class LoadingScreen extends StatelessWidget {
+  final String message;
+
+  LoadingScreen({required this.message});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -9,7 +13,7 @@ class CreationLoadingPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              'Création de votre compte en cours',
+              message,
               style: Theme.of(context).textTheme.titleLarge,
               textAlign: TextAlign.center,
             ),

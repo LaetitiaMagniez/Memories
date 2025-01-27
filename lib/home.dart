@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:memories_project/authentification/auth_gate.dart';
+import 'package:memories_project/album/album_list.dart';
 import 'package:memories_project/user/updateProfile.dart';
 import 'package:memories_project/user/profile.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -8,21 +8,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
-  Future<void> _signOut(BuildContext context) async {
-    try {
-      await FirebaseAuth.instance.signOut();
-      // Naviguez vers l'écran de connexion après la déconnexion
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => const AuthGate()),
-        (Route<dynamic> route) => false,
-      );
-    } catch (e) {
-      print("Erreur lors de la déconnexion : $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Erreur lors de la déconnexion')),
-      );
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -103,12 +88,16 @@ class HomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               ElevatedButton(
-                onPressed: () => _signOut(context),
+                onPressed: () { Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => AlbumListPage()),
+                  );
+                  },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color.fromARGB(255, 138, 87, 220),
                   foregroundColor: Colors.white,
                 ),
-                child: const Text('Déconnexion'),
+                child: const Text('Mes albums'),
               ),
             ],
           ),
