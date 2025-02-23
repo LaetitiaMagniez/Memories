@@ -59,6 +59,7 @@ GeneratedPluginRegistrant.java
 key.properties
 **/*.keystore
 **/*.jks
+.env
 
 
 # Web specific
@@ -71,3 +72,4 @@ key.properties
 lib/firebase_options.dart
 memories.json
 .firebaserc
+/.firebase

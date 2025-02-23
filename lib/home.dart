@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:memories_project/album/album_list.dart';
+import 'package:memories_project/map.dart';
 import 'package:memories_project/user/updateProfile.dart';
 import 'package:memories_project/user/profile.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -98,6 +99,19 @@ class HomeScreen extends StatelessWidget {
                   foregroundColor: Colors.white,
                 ),
                 child: const Text('Mes albums'),
+              ),
+               const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () { Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => MapPage()),
+                  );
+                  },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 138, 87, 220),
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Carte de mes souvenirs'),
               ),
             ],
           ),
