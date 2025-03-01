@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:memories_project/album/album_list.dart';
+import 'package:memories_project/calendar.dart';
 import 'package:memories_project/map.dart';
 import 'package:memories_project/user/updateProfile.dart';
 import 'package:memories_project/user/profile.dart';
@@ -113,6 +114,19 @@ class HomeScreen extends StatelessWidget {
                 ),
                 child: const Text('Carte de mes souvenirs'),
               ),
+              ElevatedButton(
+                onPressed: () { Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => CalendarPage()),
+                  );
+                  },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 138, 87, 220),
+                  foregroundColor: Colors.white,
+                ),
+                child: Text('Calendrier des souvenirs'),
+                )
+
             ],
           ),
         ),

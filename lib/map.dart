@@ -16,7 +16,8 @@ class MapPage extends StatelessWidget {
             return Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
-            return Center(child: Text("Erreur lors de la récupération des souvenirs"));
+            print("Erreur dans StreamBuilder: ${snapshot.error}");
+            return Center(child: Text("Erreur lors de la récupération des souvenirs: ${snapshot.error}"));
           }
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return Center(child: Text("Aucun souvenir trouvé"));

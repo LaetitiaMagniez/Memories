@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:memories_project/album/album_class.dart';
+import 'package:memories_project/class/album.dart';
 import 'package:memories_project/album/album_details.dart';
 import 'package:memories_project/service/album_service.dart';
 import 'package:memories_project/service/firestore_service.dart';

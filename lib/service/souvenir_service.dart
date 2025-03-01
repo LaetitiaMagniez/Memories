@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:memories_project/class/souvenir.dart';
+import 'package:intl/intl.dart';
 
 
 class SouvenirService {
@@ -39,10 +40,11 @@ Future<void> pickAndUploadMedia(BuildContext context, String albumId, String typ
 
   if (fileBytes != null && fileName != null) {
     String? ville = await _demanderVille(context);
+    DateTime? selectedDate = await _selectDate(context);
     
-    if (ville != null && ville.isNotEmpty) {
+    if (ville != null && ville.isNotEmpty && selectedDate != null) {
       try {
-        await uploadMedia(albumId, fileBytes, fileName, type, ville);
+        await uploadMedia(albumId, fileBytes, fileName, type, ville, selectedDate);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Média ajouté avec succès !')),
         );
@@ -60,7 +62,7 @@ Future<void> pickAndUploadMedia(BuildContext context, String albumId, String typ
 }
 
 
-Future<void> uploadMedia(String albumId, Uint8List fileData, String fileName, String type, String ville) async {
+Future<void> uploadMedia(String albumId, Uint8List fileData, String fileName, String type, String ville, DateTime selectedDate) async {
   User? currentUser = FirebaseAuth.instance.currentUser;
   if (currentUser == null) {
     throw Exception("Aucun utilisateur connecté");
@@ -86,6 +88,7 @@ Future<void> uploadMedia(String albumId, Uint8List fileData, String fileName, St
     'url': downloadUrl,
     'timestamp': FieldValue.serverTimestamp(),
     'ville': ville,
+    'date': selectedDate
   });
 
   await FirebaseFirestore.instance.collection('albums').doc(albumId).update({
@@ -197,29 +200,75 @@ Future<String?> _demanderVille(BuildContext context) async {
   return ville;
 }
 
+Future<DateTime?> _selectDate(BuildContext context) async {
+  final DateTime now = DateTime.now();
+  final locale = Localizations.localeOf(context);
+  final localizations = MaterialLocalizations.of(context);
+
+  final DateTime? picked = await showDatePicker(
+    context: context,
+    initialDate: now,
+    firstDate: DateTime(2000),
+    lastDate: now,
+    locale: locale,
+    helpText: 'Sélectionner une date',
+    cancelText: 'Annuler',
+    confirmText: 'OK',
+    fieldLabelText: 'Entrez une date',
+    fieldHintText: 'JJ/MM/AAAA',
+    builder: (BuildContext context, Widget? child) {
+      return Theme(
+        data: ThemeData.light().copyWith(
+          primaryColor: Colors.blue, // Personnalisez la couleur principale
+          colorScheme: ColorScheme.light(primary: Colors.blue),
+          buttonTheme: ButtonThemeData(textTheme: ButtonTextTheme.primary),
+        ),
+        child: child!,
+      );
+    },
+  );
+
+  return picked;
+}
+
 Stream<List<Souvenir>> getAllSouvenirsForUser() {
   User? currentUser = FirebaseAuth.instance.currentUser;
   if (currentUser == null) {
     return Stream.value([]);
   }
+  
   return FirebaseFirestore.instance
       .collection('albums')
       .where('userId', isEqualTo: currentUser.uid)
       .snapshots()
       .asyncMap((albumsSnapshot) async {
-    List<Souvenir> allSouvenirs = [];
-    for (var albumDoc in albumsSnapshot.docs) {
-      var mediaSnapshot = await albumDoc.reference.collection('media').get();
-      allSouvenirs.addAll(mediaSnapshot.docs.map((doc) => Souvenir(
-        id: doc.id,
-        ville: doc['ville'],
-        url: doc['url'],
-        type: doc['type'],
-      )));
+    try {
+      List<Souvenir> allSouvenirs = [];
+      for (var albumDoc in albumsSnapshot.docs) {
+        var mediaSnapshot = await albumDoc.reference.collection('media').get();
+        allSouvenirs.addAll(mediaSnapshot.docs.map((doc) {
+          try {
+            return Souvenir(
+              id: doc.id,
+              ville: doc['ville'] as String?,
+              url: doc['url'] as String,
+              type: doc['type'] as String,
+              date: (doc['date'] as Timestamp).toDate(),
+            );
+          } catch (e) {
+            print("Erreur lors de la création d'un Souvenir: $e");
+            return null;
+          }
+        }).whereType<Souvenir>());
+      }
+      return allSouvenirs;
+    } catch (e) {
+      print("Erreur dans getAllSouvenirsForUser: $e");
+      return <Souvenir>[];
     }
-    return allSouvenirs;
   });
 }
+
 
 
 Map<String, List<Souvenir>> groupSouvenirsByCity(List<Souvenir> souvenirs) {
@@ -235,4 +284,13 @@ Map<String, List<Souvenir>> groupSouvenirsByCity(List<Souvenir> souvenirs) {
   }
 
   return souvenirsByCity;
+}
+Map<String, List<Souvenir>> souvenirs = {};
+
+List<Souvenir> _getEventsForDay(DateTime day) {
+  String formattedDate = DateFormat('d MMMM yyyy', 'fr_FR').format(day);
+  return souvenirs.entries
+    .where((entry) => entry.key == formattedDate)
+    .expand((entry) => entry.value)
+    .toList();
 }

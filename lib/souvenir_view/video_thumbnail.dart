@@ -9,7 +9,6 @@ class VideoThumbnail extends StatefulWidget {
   State<VideoThumbnail> createState() => _VideoThumbnailState();
 }
 
-
 class _VideoThumbnailState extends State<VideoThumbnail> {
   late VideoPlayerController _controller;
 
@@ -28,19 +27,31 @@ class _VideoThumbnailState extends State<VideoThumbnail> {
     _controller.dispose();
   }
 
-   @override
+  @override
   Widget build(BuildContext context) {
     return Container(
       width: 100,
       height: 100,
-      child: _controller.value.isInitialized
-          ? AspectRatio(
-              aspectRatio: _controller.value.aspectRatio,
-              child: VideoPlayer(_controller),
-            )
-          : Center(
-              child: CircularProgressIndicator(),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          _controller.value.isInitialized
+              ? AspectRatio(
+                  aspectRatio: _controller.value.aspectRatio,
+                  child: VideoPlayer(_controller),
+                )
+              : Center(
+                  child: CircularProgressIndicator(),
+                ),
+          Center(
+            child: Icon(
+              Icons.play_circle_filled,
+              size: 40,
+              color: Colors.white.withOpacity(0.7),
             ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:memories_project/album/album_class.dart';
+import 'package:memories_project/class/album.dart';
 
 class FirestoreService {
   Stream<List<Album>> getAlbumsWithDetails() {
@@ -14,6 +14,7 @@ class FirestoreService {
         
         // URL de la vignette (le média le plus récent)
         String thumbnailUrl = mediaQuery.docs.isNotEmpty ? mediaQuery.docs.first['url'] : '';
+        String thumbnailType = mediaQuery.docs.isNotEmpty ? mediaQuery.docs.first['type'] : '';
         
         // Compter le nombre d'éléments dans l'album
         int itemCount = await doc.reference.collection('media').count().get().then((value) => value.count!);
@@ -23,6 +24,7 @@ class FirestoreService {
           id: doc.id,
           name: doc['name'],
           thumbnailUrl: thumbnailUrl,
+          thumbnailType: thumbnailType,
           itemCount: itemCount,
         ));
       }

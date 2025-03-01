@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:memories_project/album/album_class.dart';
+import 'package:memories_project/class/album.dart';
 import 'package:memories_project/album/album_details.dart';
 import 'package:memories_project/album/album_list.dart';
 import 'package:memories_project/transition/loadingScreen.dart';
