@@ -1,6 +1,6 @@
 // album_thumbnail.dart
 import 'package:flutter/material.dart';
-import '../class/album.dart';
+import '../../class/album.dart';
 import 'package:memories_project/souvenir_view/video_thumbnail.dart';
 
 class AlbumThumbnail extends StatelessWidget {

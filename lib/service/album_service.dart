@@ -3,8 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:memories_project/class/album.dart';
-import 'package:memories_project/album/album_details.dart';
-import 'package:memories_project/album/album_list.dart';
+import 'package:memories_project/screens/album/album_details.dart';
+import 'package:memories_project/screens/album/album_list.dart';
 import 'package:memories_project/transition/loadingScreen.dart';
 
 class AlbumService {
@@ -156,55 +156,134 @@ void _confirmDeleteAlbum(BuildContext context, Album album) {
 }
 
 
-  void showCreateAlbumDialog(BuildContext context) {
-    final TextEditingController _controller = TextEditingController();
+void showCreateAlbumDialog(BuildContext context) {
+    final TextEditingController _nameController = TextEditingController();
+    final TextEditingController _cityController = TextEditingController();
+    DateTime? _selectedDate; // Change to DateTime? to allow null
+    bool _noCity = false;
 
+    Future<DateTime?> _selectDate(BuildContext context) async {
+      final DateTime now = DateTime.now();
+      final locale = Localizations.localeOf(context);
+      final localizations = MaterialLocalizations.of(context);
+
+      final DateTime? picked = await showDatePicker(
+        context: context,
+        initialDate: _selectedDate ?? now, // Use _selectedDate if not null, otherwise now
+        firstDate: DateTime(2000),
+        lastDate: now,
+        locale: locale,
+        helpText: 'Sélectionner une date',
+        cancelText: 'Annuler',
+        confirmText: 'OK',
+        fieldLabelText: 'Entrez une date',
+        fieldHintText: 'JJ/MM/AAAA',
+        builder: (BuildContext context, Widget? child) {
+          return Theme(
+            data: ThemeData.light().copyWith(
+              primaryColor: const Color.fromARGB(255, 138, 87, 220), // Personnalisez la couleur principale
+              colorScheme: ColorScheme.light(primary: const Color.fromARGB(255, 138, 87, 220)),
+              buttonTheme: ButtonThemeData(textTheme: ButtonTextTheme.primary),
+            ),
+            child: child!,
+          );
+        },
+      );
+
+      return picked;
+    }
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Créer un nouvel album'),
-          content: TextField(
-            controller: _controller,
-            decoration: InputDecoration(hintText: "Nom de l'album"),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text('Annuler'),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            TextButton(
-              child: Text('Créer'),
-              onPressed: () async {
-                if (_controller.text.isNotEmpty) {
-                  String albumId = await _createAlbum(_controller.text);
-                  Navigator.of(context).pop();
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => AlbumDetailPage(
-                        albumId: albumId,
-                        albumName: _controller.text,
-                      ),
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text('Créer un nouvel album'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: _nameController,
+                      decoration: InputDecoration(hintText: "Nom de l'album"),
                     ),
-                  );
-                }
-              },
-            ),
-          ],
+                    SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Checkbox(
+                          value: _noCity,
+                          onChanged: (bool? value) {
+                            setState(() {
+                              _noCity = value ?? false;
+                            });
+                          },
+                        ),
+                        Text('Ne pas spécifier de ville'),
+                      ],
+                    ),
+                    if (!_noCity)
+                      TextField(
+                        controller: _cityController,
+                        decoration: InputDecoration(hintText: "Ville"),
+                      ),
+                    SizedBox(height: 10),
+                    ListTile(
+                      title: Text('Date: ${_selectedDate != null ? _selectedDate!.toLocal().toString().split(' ')[0] : ' '}'),
+                      trailing: Icon(Icons.calendar_today),
+                      onTap: () async {
+                        final DateTime? picked = await _selectDate(context);
+                        if (picked != null) {
+                          setState(() => _selectedDate = picked);
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: Text('Annuler'),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+                TextButton(
+                  child: Text('Créer'),
+                  onPressed: () async {
+                    if (_nameController.text.isNotEmpty) {
+                      String city = _noCity ? '' : _cityController.text;
+                      String albumId = await _createAlbum(
+                        _nameController.text,
+                        city,
+                        _selectedDate,
+                      );
+                      Navigator.of(context).pop();
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AlbumDetailPage(
+                            albumId: albumId,
+                            albumName: _nameController.text,
+                          ),
+                        ),
+                      );
+                    }
+                  },
+                ),
+              ],
+            );
+          },
         );
       },
     );
   }
 
-  Future<String> _createAlbum(String albumName) async {
+   Future<String> _createAlbum(String albumName, String city, DateTime? date) async {
     User? currentUser = FirebaseAuth.instance.currentUser;
-    if (currentUser == null) {
-      throw Exception("Aucun utilisateur connecté");
-    }
+    if (currentUser == null) throw Exception("Aucun utilisateur connecté");
 
     DocumentReference docRef = await FirebaseFirestore.instance.collection('albums').add({
       'name': albumName,
+      'city': city,
+      'date': date != null ? Timestamp.fromDate(date) : null, // Store null if no date is selected
       'userId': currentUser.uid,
       'createdAt': FieldValue.serverTimestamp(),
     });
@@ -212,4 +291,3 @@ void _confirmDeleteAlbum(BuildContext context, Album album) {
     return docRef.id;
   }
 }
-

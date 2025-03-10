@@ -11,7 +11,7 @@ import 'package:intl/intl.dart';
 
 
 class SouvenirService {
-
+final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 Future<void> pickAndUploadMedia(BuildContext context, String albumId, String type) async {
   Uint8List? fileBytes;
   String? fileName;
@@ -39,12 +39,8 @@ Future<void> pickAndUploadMedia(BuildContext context, String albumId, String typ
   }
 
   if (fileBytes != null && fileName != null) {
-    String? ville = await _demanderVille(context);
-    DateTime? selectedDate = await _selectDate(context);
-    
-    if (ville != null && ville.isNotEmpty && selectedDate != null) {
       try {
-        await uploadMedia(albumId, fileBytes, fileName, type, ville, selectedDate);
+        await uploadMedia(albumId, fileBytes, fileName, type);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Média ajouté avec succès !')),
         );
@@ -58,11 +54,10 @@ Future<void> pickAndUploadMedia(BuildContext context, String albumId, String typ
         SnackBar(content: Text('Ajout annulé : aucune ville spécifiée')),
       );
     }
-  }
 }
 
 
-Future<void> uploadMedia(String albumId, Uint8List fileData, String fileName, String type, String ville, DateTime selectedDate) async {
+Future<void> uploadMedia(String albumId, Uint8List fileData, String fileName, String type) async {
   User? currentUser = FirebaseAuth.instance.currentUser;
   if (currentUser == null) {
     throw Exception("Aucun utilisateur connecté");
@@ -79,6 +74,9 @@ Future<void> uploadMedia(String albumId, Uint8List fileData, String fileName, St
   TaskSnapshot snapshot = await uploadTask;
   String downloadUrl = await snapshot.ref.getDownloadURL();
 
+DocumentSnapshot albumSnapshot = await _firestore.collection('albums').doc(albumId).get();
+    if (!albumSnapshot.exists) throw Exception("Album non trouvé");
+ Map<String, dynamic> albumData = albumSnapshot.data() as Map<String, dynamic>;
   await FirebaseFirestore.instance
       .collection('albums')
       .doc(albumId)
@@ -87,8 +85,8 @@ Future<void> uploadMedia(String albumId, Uint8List fileData, String fileName, St
     'type': type,
     'url': downloadUrl,
     'timestamp': FieldValue.serverTimestamp(),
-    'ville': ville,
-    'date': selectedDate
+    'ville': albumData['ville'],
+    'date': albumData['date']
   });
 
   await FirebaseFirestore.instance.collection('albums').doc(albumId).update({
@@ -165,70 +163,6 @@ void showDeleteConfirmationDialog(BuildContext context, String albumId, String m
     },
   );
   }
-}
-
-Future<String?> _demanderVille(BuildContext context) async {
-  String? ville;
-  await showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: Text('Entrez la ville'),
-        content: TextField(
-          onChanged: (value) {
-            ville = value;
-          },
-          decoration: InputDecoration(hintText: "Nom de la ville"),
-        ),
-        actions: <Widget>[
-          TextButton(
-            child: Text('Annuler'),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-          TextButton(
-            child: Text('OK'),
-            onPressed: () {
-              Navigator.of(context).pop(ville);
-            },
-          ),
-        ],
-      );
-    },
-  );
-  return ville;
-}
-
-Future<DateTime?> _selectDate(BuildContext context) async {
-  final DateTime now = DateTime.now();
-  final locale = Localizations.localeOf(context);
-  final localizations = MaterialLocalizations.of(context);
-
-  final DateTime? picked = await showDatePicker(
-    context: context,
-    initialDate: now,
-    firstDate: DateTime(2000),
-    lastDate: now,
-    locale: locale,
-    helpText: 'Sélectionner une date',
-    cancelText: 'Annuler',
-    confirmText: 'OK',
-    fieldLabelText: 'Entrez une date',
-    fieldHintText: 'JJ/MM/AAAA',
-    builder: (BuildContext context, Widget? child) {
-      return Theme(
-        data: ThemeData.light().copyWith(
-          primaryColor: Colors.blue, // Personnalisez la couleur principale
-          colorScheme: ColorScheme.light(primary: Colors.blue),
-          buttonTheme: ButtonThemeData(textTheme: ButtonTextTheme.primary),
-        ),
-        child: child!,
-      );
-    },
-  );
-
-  return picked;
 }
 
 Stream<List<Souvenir>> getAllSouvenirsForUser() {

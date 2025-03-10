@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:memories_project/transition/loadingScreen.dart';
-import 'package:memories_project/user/profile.dart';
+import 'package:memories_project/screens/user/profile.dart';
 
 
 class SignUpPage extends StatefulWidget {

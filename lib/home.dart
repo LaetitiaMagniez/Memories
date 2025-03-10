@@ -1,135 +1,100 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:memories_project/album/album_list.dart';
-import 'package:memories_project/calendar.dart';
-import 'package:memories_project/map.dart';
-import 'package:memories_project/user/updateProfile.dart';
-import 'package:memories_project/user/profile.dart';
+import 'package:memories_project/screens/album/album_list.dart';
+import 'package:memories_project/screens/calendar.dart';
+import 'package:memories_project/screens/map.dart';
+import 'package:memories_project/screens/user/profile.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  int _selectedIndex = 0;
+
+  final List<Widget> _pages = [
+    AlbumListPage(),
+    MapPage(),
+    CalendarPage(),
+    ProfilePage(),
+  ];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-            actions: [
-              StreamBuilder<DocumentSnapshot>(
-                stream: FirebaseFirestore.instance
-                    .collection('users')
-                    .doc(FirebaseAuth.instance.currentUser?.uid)
-                    .snapshots(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData && snapshot.data != null) {
-                    final userData = snapshot.data!.data() as Map<String, dynamic>?;
-                    final profileImageUrl = userData?['profilePicture'] as String?;
-                    
-                    return GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute<void>(
-                            builder: (context) => const ProfilePage(),
-                          ),
-                        );
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: CircleAvatar(
-                          backgroundImage: profileImageUrl != null
-                              ? NetworkImage(profileImageUrl)
-                              : null,
-                          child: profileImageUrl == null
-                              ? const Icon(Icons.person)
-                              : null,
-                        ),
-                      ),
-                    );
-                  }
-                  return IconButton(
-                    icon: const Icon(Icons.person),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute<void>(
-                          builder: (context) => const ProfilePage(),
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
-            ],
-            automaticallyImplyLeading: false,
-          ),
-      body: SingleChildScrollView(
-        child: Center(
-          child: Column(
-            children: [
-              ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxWidth: MediaQuery.of(context).size.width * 0.8,
-                ),
-                child: Image.asset('assets/dash.png'),
-              ),
-              Text(
-                'Welcome!',
-                style: Theme.of(context).textTheme.headlineMedium,
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const UpdateProfilePage()),
-                  );
-                },
-                child: const Text('Mettre à jour le profil'),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () { Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => AlbumListPage()),
-                  );
-                  },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(255, 138, 87, 220),
-                  foregroundColor: Colors.white,
-                ),
-                child: const Text('Mes albums'),
-              ),
-               const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () { Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => MapPage()),
-                  );
-                  },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(255, 138, 87, 220),
-                  foregroundColor: Colors.white,
-                ),
-                child: const Text('Carte de mes souvenirs'),
-              ),
-              ElevatedButton(
-                onPressed: () { Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => CalendarPage()),
-                  );
-                  },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(255, 138, 87, 220),
-                  foregroundColor: Colors.white,
-                ),
-                child: Text('Calendrier des souvenirs'),
-                )
+        title: const Text('Memories'),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: StreamBuilder<DocumentSnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(FirebaseAuth.instance.currentUser?.uid)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData && snapshot.data != null) {
+                  final userData = snapshot.data!.data() as Map<String, dynamic>?;
+                  final profileImageUrl = userData?['profilePicture'] as String?;
 
-            ],
+                  return CircleAvatar(
+                    radius: 20, // Taille du CircleAvatar réduite
+                    backgroundImage: profileImageUrl != null
+                        ? NetworkImage(profileImageUrl)
+                        : null,
+                    child: profileImageUrl == null
+                        ? const Icon(Icons.person, size: 20) // Taille de l'icône réduite
+                        : null,
+                  );
+                } else {
+                  return const CircleAvatar(
+                    radius: 20, // Taille du CircleAvatar réduite
+                    child: Icon(Icons.person, size: 20), // Taille de l'icône réduite
+                  );
+                }
+              },
+            ),
           ),
-        ),
+        ],
+      ),
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: _pages,
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.photo_album),
+            label: 'Albums',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.map),
+            label: 'Carte',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_today),
+            label: 'Calendrier',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profil',
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: Color.fromARGB(255, 138, 87, 220),
+        unselectedItemColor: Colors.grey,
+        showUnselectedLabels: true,
+        onTap: _onItemTapped,
       ),
     );
   }

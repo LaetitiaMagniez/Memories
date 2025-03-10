@@ -76,7 +76,6 @@ class _CalendarPageState extends State<CalendarPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Calendrier des souvenirs')),
       body: Column(
         children: [
           TableCalendar<Souvenir>(

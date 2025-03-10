@@ -103,16 +103,9 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
     }
   }
 
-  @override
+    @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Mettre à jour le profil'),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -145,4 +138,5 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
       ),
     );
   }
+
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:memories_project/class/album.dart';
-import 'package:memories_project/album/album_details.dart';
+import 'package:memories_project/screens/album/album_details.dart';
 import 'package:memories_project/service/album_service.dart';
 import 'package:memories_project/service/firestore_service.dart';
 import 'album_thumbnail.dart';
@@ -12,7 +12,6 @@ class AlbumListPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Mes Albums')),
       body: StreamBuilder<List<Album>>(
         stream: firestoreService.getAlbumsWithDetails(),
         builder: (context, snapshot) {
