@@ -6,4 +6,4 @@ sur une carte ainsi que dans un calendrier.
 
 # Gantt du projet
 
-![Diagramme de Gantt](docs\Gantt.png)
+![Diagramme de Gantt](./docs/Gantt.png)
