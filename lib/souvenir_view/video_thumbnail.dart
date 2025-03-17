@@ -3,7 +3,7 @@ import 'package:video_player/video_player.dart';
 
 class VideoThumbnail extends StatefulWidget {
   final String videoPath;
-  VideoThumbnail(this.videoPath);
+  const VideoThumbnail(this.videoPath, {super.key});
 
   @override
   State<VideoThumbnail> createState() => _VideoThumbnailState();
@@ -29,7 +29,7 @@ class _VideoThumbnailState extends State<VideoThumbnail> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: 100,
       height: 100,
       child: Stack(

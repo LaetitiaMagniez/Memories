@@ -9,7 +9,7 @@ class AlbumDetailPage extends StatefulWidget {
   final String albumId;
   final String albumName;
 
-  AlbumDetailPage({required this.albumId, required this.albumName});
+  const AlbumDetailPage({super.key, required this.albumId, required this.albumName});
 
   @override
   _AlbumDetailPageState createState() => _AlbumDetailPageState();

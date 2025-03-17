@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class LoadingScreen extends StatelessWidget {
   final String message;
 
-  LoadingScreen({required this.message});
+  const LoadingScreen({super.key, required this.message});
 
   @override
   Widget build(BuildContext context) {

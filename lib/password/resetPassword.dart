@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:memories_project/authentification/auth_gate.dart';
 
 class ResetPasswordHandler extends StatefulWidget {
+  const ResetPasswordHandler({super.key});
+
   @override
   _ResetPasswordHandlerState createState() => _ResetPasswordHandlerState();
 }
@@ -51,7 +53,7 @@ class _ResetPasswordHandlerState extends State<ResetPasswordHandler> {
 class ResetPasswordPage extends StatefulWidget {
   final String oobCode;
 
-  ResetPasswordPage({required this.oobCode});
+  const ResetPasswordPage({super.key, required this.oobCode});
 
   @override
   _ResetPasswordPageState createState() => _ResetPasswordPageState();

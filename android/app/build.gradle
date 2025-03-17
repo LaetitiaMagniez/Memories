@@ -8,6 +8,8 @@ plugins {
     id "dev.flutter.flutter-gradle-plugin"
 }
 
+def googleApiKey = project.hasProperty('GOOGLE_API_KEY') ? GOOGLE_API_KEY : ""
+
 android {
     namespace = "com.example.memories_project"
     compileSdk = flutter.compileSdkVersion
@@ -35,7 +37,7 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
-        manifestPlaceholders = [MAPS_API_KEY: "${System.getenv("MAPS_API_KEY")}"]
+        manifestPlaceholders = [GOOGLE_API_KEY: googleApiKey]
     }
 
     buildTypes {

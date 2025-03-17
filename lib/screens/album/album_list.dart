@@ -9,6 +9,8 @@ class AlbumListPage extends StatelessWidget {
   final FirestoreService firestoreService = FirestoreService();
   final AlbumService albumService = AlbumService();
 
+  AlbumListPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

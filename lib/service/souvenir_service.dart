@@ -74,9 +74,9 @@ Future<void> uploadMedia(String albumId, Uint8List fileData, String fileName, St
   TaskSnapshot snapshot = await uploadTask;
   String downloadUrl = await snapshot.ref.getDownloadURL();
 
-DocumentSnapshot albumSnapshot = await _firestore.collection('albums').doc(albumId).get();
-    if (!albumSnapshot.exists) throw Exception("Album non trouvé");
- Map<String, dynamic> albumData = albumSnapshot.data() as Map<String, dynamic>;
+  DocumentSnapshot albumSnapshot = await _firestore.collection('albums').doc(albumId).get();
+  if (!albumSnapshot.exists) throw Exception("Album non trouvé");
+  Map<String, dynamic> albumData = albumSnapshot.data() as Map<String, dynamic>;
   await FirebaseFirestore.instance
       .collection('albums')
       .doc(albumId)

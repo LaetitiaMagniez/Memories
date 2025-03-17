@@ -42,7 +42,7 @@ class AlbumService {
   }
 
   void renameAlbum(BuildContext context, Album album) {
-    final TextEditingController _controller = TextEditingController(text: album.name);
+    final TextEditingController controller = TextEditingController(text: album.name);
 
     showDialog(
       context: context,
@@ -50,7 +50,7 @@ class AlbumService {
         return AlertDialog(
           title: Text('Renommer l\'album'),
           content: TextField(
-            controller: _controller,
+            controller: controller,
             decoration: InputDecoration(hintText: "Nouveau nom de l'album"),
           ),
           actions: <Widget>[
@@ -61,9 +61,9 @@ class AlbumService {
             TextButton(
               child: Text('Renommer'),
               onPressed: () async {
-                if (_controller.text.isNotEmpty) {
+                if (controller.text.isNotEmpty) {
                   await FirebaseFirestore.instance.collection('albums').doc(album.id).update({
-                    'name': _controller.text,
+                    'name': controller.text,
                   });
                   Navigator.of(context).pop();
                 }
@@ -157,19 +157,19 @@ void _confirmDeleteAlbum(BuildContext context, Album album) {
 
 
 void showCreateAlbumDialog(BuildContext context) {
-    final TextEditingController _nameController = TextEditingController();
-    final TextEditingController _cityController = TextEditingController();
-    DateTime? _selectedDate; // Change to DateTime? to allow null
-    bool _noCity = false;
+    final TextEditingController nameController = TextEditingController();
+    final TextEditingController cityController = TextEditingController();
+    DateTime? selectedDate; // Change to DateTime? to allow null
+    bool noCity = false;
 
-    Future<DateTime?> _selectDate(BuildContext context) async {
+    Future<DateTime?> selectDate(BuildContext context) async {
       final DateTime now = DateTime.now();
       final locale = Localizations.localeOf(context);
       final localizations = MaterialLocalizations.of(context);
 
       final DateTime? picked = await showDatePicker(
         context: context,
-        initialDate: _selectedDate ?? now, // Use _selectedDate if not null, otherwise now
+        initialDate: selectedDate ?? now, // Use _selectedDate if not null, otherwise now
         firstDate: DateTime(2000),
         lastDate: now,
         locale: locale,
@@ -204,36 +204,36 @@ void showCreateAlbumDialog(BuildContext context) {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     TextField(
-                      controller: _nameController,
+                      controller: nameController,
                       decoration: InputDecoration(hintText: "Nom de l'album"),
                     ),
                     SizedBox(height: 10),
                     Row(
                       children: [
                         Checkbox(
-                          value: _noCity,
+                          value: noCity,
                           onChanged: (bool? value) {
                             setState(() {
-                              _noCity = value ?? false;
+                              noCity = value ?? false;
                             });
                           },
                         ),
                         Text('Ne pas spécifier de ville'),
                       ],
                     ),
-                    if (!_noCity)
+                    if (!noCity)
                       TextField(
-                        controller: _cityController,
+                        controller: cityController,
                         decoration: InputDecoration(hintText: "Ville"),
                       ),
                     SizedBox(height: 10),
                     ListTile(
-                      title: Text('Date: ${_selectedDate != null ? _selectedDate!.toLocal().toString().split(' ')[0] : ' '}'),
+                      title: Text('Date: ${selectedDate != null ? selectedDate!.toLocal().toString().split(' ')[0] : ' '}'),
                       trailing: Icon(Icons.calendar_today),
                       onTap: () async {
-                        final DateTime? picked = await _selectDate(context);
+                        final DateTime? picked = await selectDate(context);
                         if (picked != null) {
-                          setState(() => _selectedDate = picked);
+                          setState(() => selectedDate = picked);
                         }
                       },
                     ),
@@ -248,12 +248,12 @@ void showCreateAlbumDialog(BuildContext context) {
                 TextButton(
                   child: Text('Créer'),
                   onPressed: () async {
-                    if (_nameController.text.isNotEmpty) {
-                      String city = _noCity ? '' : _cityController.text;
+                    if (nameController.text.isNotEmpty) {
+                      String city = noCity ? '' : cityController.text;
                       String albumId = await _createAlbum(
-                        _nameController.text,
+                        nameController.text,
                         city,
-                        _selectedDate,
+                        selectedDate,
                       );
                       Navigator.of(context).pop();
                       Navigator.push(
@@ -261,7 +261,7 @@ void showCreateAlbumDialog(BuildContext context) {
                         MaterialPageRoute(
                           builder: (context) => AlbumDetailPage(
                             albumId: albumId,
-                            albumName: _nameController.text,
+                            albumName: nameController.text,
                           ),
                         ),
                       );
@@ -273,16 +273,17 @@ void showCreateAlbumDialog(BuildContext context) {
           },
         );
       },
+
     );
   }
 
-   Future<String> _createAlbum(String albumName, String city, DateTime? date) async {
+    Future<String> _createAlbum(String albumName, String city, DateTime? date) async {
     User? currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser == null) throw Exception("Aucun utilisateur connecté");
 
     DocumentReference docRef = await FirebaseFirestore.instance.collection('albums').add({
       'name': albumName,
-      'city': city,
+      'ville': city,
       'date': date != null ? Timestamp.fromDate(date) : null, // Store null if no date is selected
       'userId': currentUser.uid,
       'createdAt': FieldValue.serverTimestamp(),

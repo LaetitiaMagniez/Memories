@@ -5,6 +5,8 @@ import 'package:memories_project/service/souvenir_service.dart';
 import 'package:memories_project/service/map_service.dart';
 
 class MapPage extends StatelessWidget {
+  const MapPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

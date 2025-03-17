@@ -3,7 +3,7 @@ import 'package:video_player/video_player.dart';
 
 class VideoViewer extends StatefulWidget {
   final String videoPath;
-  VideoViewer(this.videoPath);
+  const VideoViewer(this.videoPath, {super.key});
 
   @override
   _VideoViewerState createState() => _VideoViewerState();

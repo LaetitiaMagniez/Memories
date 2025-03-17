@@ -80,7 +80,7 @@ class MapService {
         return StatefulBuilder(
           builder: (context, setState) {
             return Dialog(
-              child: Container(
+              child: SizedBox(
                 width: MediaQuery.of(context).size.width * 0.9,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,

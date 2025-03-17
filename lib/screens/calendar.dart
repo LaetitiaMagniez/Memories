@@ -11,6 +11,8 @@ import 'package:intl/date_symbol_data_local.dart';
 
 
 class CalendarPage extends StatefulWidget {
+  const CalendarPage({super.key});
+
   @override
   _CalendarPageState createState() => _CalendarPageState();
 }
@@ -195,7 +197,7 @@ class _CalendarPageState extends State<CalendarPage> {
                     ? Image.network(souvenir.url)
                     : AspectRatio(
                         aspectRatio: 16 / 9, // Ratio d'aspect pour les vidéos
-                        child: Container(
+                        child: SizedBox(
                           height: 250, // Hauteur plus grande pour les vidéos
                           child: VideoThumbnail(souvenir.url),
                         ),

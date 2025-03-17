@@ -7,7 +7,7 @@ class AlbumThumbnail extends StatelessWidget {
   final Album album;
   final VoidCallback onTap;
 
-  AlbumThumbnail({required this.album, required this.onTap});
+  const AlbumThumbnail({super.key, required this.album, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
