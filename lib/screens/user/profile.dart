@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:memories_project/screens/user/friendsPage.dart';
 import 'package:memories_project/service/profile_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:io';
 
 import 'package:memories_project/transition/loadingScreen.dart';
+
+import '../../class/statCard.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -21,6 +24,8 @@ class _ProfilePageState extends State<ProfilePage> {
   bool _isEditing = false;
   int _albumCount = 0;
   int _memoriesCount = 0;
+  int _sharedAlbumCount = 0;
+  int _sharedMemoriesCount = 0;
 
   final ProfileService _profileService = ProfileService();
 
@@ -41,6 +46,8 @@ class _ProfilePageState extends State<ProfilePage> {
     setState(() {
       _albumCount = counts['albumCount'] ?? 0;
       _memoriesCount = counts['memoriesCount'] ?? 0;
+      _sharedAlbumCount = counts['sharedAlbumCount'] ?? 0;
+      _sharedMemoriesCount = counts['sharedMemoriesCount'] ?? 0;
     });
   }
 
@@ -149,67 +156,146 @@ class _ProfilePageState extends State<ProfilePage> {
                   },
                 ),
                 const SizedBox(height: 24),
+                const SizedBox(height: 24),
                 if (_isEditing)
-                  TextField(
-                    controller: _usernameController,
-                    decoration: const InputDecoration(
-                        labelText: 'Nom d\'utilisateur'),
-                    textAlign: TextAlign.center,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.person, color: Colors.grey),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: TextField(
+                          controller: _usernameController,
+                          decoration: const InputDecoration(
+                            labelText: 'Nom d\'utilisateur',
+                            border: InputBorder.none,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
                   )
                 else
-                  Text(
-                    _usernameController.text,
-                    style: Theme.of(context).textTheme.titleMedium,
-                    textAlign: TextAlign.center,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.person, color: Colors.grey),
+                      const SizedBox(width: 8),
+                      Text(
+                        _usernameController.text,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ],
                   ),
                 const SizedBox(height: 24),
-                Text(
-                  'Email: ${FirebaseAuth.instance.currentUser?.email ?? 'Non disponible'}',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  textAlign: TextAlign.center,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.email, color: Colors.grey),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Email: ${FirebaseAuth.instance.currentUser?.email ?? 'Non disponible'}',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ],
+                ),
+
+                // Ajout des cartes statistiques
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
+                  children: [
+                    StatCard(
+                      title: 'Mes albums',
+                      count: _albumCount,
+                      color: const Color.fromARGB(255, 138, 87, 220),
+                    ),
+                    StatCard(
+                      title: 'Albums collaboratifs',
+                      count: _sharedAlbumCount,
+                      color: const Color.fromARGB(255, 190, 149, 255),
+                    ),
+                    StatCard(
+                      title: 'Mes souvenirs',
+                      count: _memoriesCount,
+                      color: const Color.fromARGB(255, 190, 149, 255),
+                    ),
+                    StatCard(
+                      title: 'Souvenirs partagés',
+                      count: _sharedMemoriesCount,
+                      color: const Color.fromARGB(255, 138, 87, 220),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 32),
+                Card(
+                  color: const Color.fromARGB(255, 138, 87, 220),
+                  elevation: 4,
+                  child: InkWell(
+                    onTap: () async {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => FriendsPage(),
+                        ),
+                      );
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.person, color: Colors.white),
+                          const SizedBox(width: 8),
+                          Text('Mes amis', style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white)),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 16),
-                Text(
-                  'Nombre d\'albums: $_albumCount',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  textAlign: TextAlign.center,
-                ),
-                Text(
-                  'Nombre de souvenirs: $_memoriesCount',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 32),
-                ElevatedButton.icon(
-                  onPressed: () => _profileService.signOut(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        const Color.fromARGB(255, 138, 87, 220),
-                    foregroundColor: Colors.white,
+                Card(
+                  color: const Color.fromARGB(255, 138, 87, 220),
+                  elevation: 4,
+                  child: InkWell(
+                    onTap: () => _profileService.signOut(context),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.power_settings_new, color: Colors.white),
+                          const SizedBox(width: 8),
+                          Text('Déconnexion', style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white)),
+                        ],
+                      ),
+                    ),
                   ),
-                  icon: const Icon(Icons.power_settings_new, color: Colors.white),
-                  label: const Text('Déconnexion',
-                      style: TextStyle(color: Colors.white)),
                 ),
-                ElevatedButton.icon(
-                  onPressed: () => _profileService.showDeleteConfirmation(
-                      context, () async {
-                    Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => LoadingScreen(
-                          message: 'Suppression du compte en cours'),
-                    ));
+                const SizedBox(height: 16),
+                Card(
+                  color: const Color.fromARGB(255, 220, 158, 87),
+                  elevation: 4,
+                  child: InkWell(
+                    onTap: () => _profileService.showDeleteConfirmation(
+                        context, () async {
+                      Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => LoadingScreen(
+                            message: 'Suppression du compte en cours'),
+                      ));
 
-                    await _profileService.deleteAccount(
-                        context, _currentImageUrl);
-                  }),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        const Color.fromARGB(255, 220, 158, 87),
-                    foregroundColor: Colors.white,
+                      await _profileService.deleteAccount(
+                          context, _currentImageUrl);
+                    }),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.delete, color: Colors.white),
+                          const SizedBox(width: 8),
+                          Text('Supprimer mon compte', style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white)),
+                        ],
+                      ),
+                    ),
                   ),
-                  icon: const Icon(Icons.delete, color: Colors.white),
-                  label: const Text('Supprimer mon compte',
-                      style: TextStyle(color: Colors.white)),
                 ),
               ],
             ),

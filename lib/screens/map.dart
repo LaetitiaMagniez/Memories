@@ -5,13 +5,15 @@ import 'package:memories_project/service/souvenir_service.dart';
 import 'package:memories_project/service/map_service.dart';
 
 class MapPage extends StatelessWidget {
-  const MapPage({super.key});
+  MapPage({super.key});
+  final SouvenirService souvenirService = SouvenirService();
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: StreamBuilder<List<Souvenir>>(
-        stream: getAllSouvenirsForUser(),
+        stream: souvenirService.getAllSouvenirsForUser(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());

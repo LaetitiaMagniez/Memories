@@ -84,8 +84,7 @@ class _LoginState extends State<Login> {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 50),
-                  Text('Créez vos albums'
-                    '',
+                  Text('Créez vos albums souvenirs',
                     style: Theme.of(context).textTheme.titleLarge,
                     textAlign: TextAlign.center,
                   ),

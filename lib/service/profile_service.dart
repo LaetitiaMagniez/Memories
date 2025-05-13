@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -6,11 +7,16 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:memories_project/authentification/auth_gate.dart';
+import 'package:memories_project/service/contact_service.dart';
 import 'package:memories_project/transition/loadingScreen.dart';
+
+import '../class/appUser.dart';
 
 class ProfileService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final ContactService contactService = ContactService();
+  List<AppUser> friends = [];
 
   void signOut(BuildContext context) async {
     try {
@@ -47,6 +53,10 @@ class ProfileService {
   Future<Map<String, int>> loadCounts() async {
     int albumCount = 0;
     int memoriesCount = 0;
+    int sharedAlbumCount = 0;
+    int sharedMemoriesCount = 0;
+    friends = contactService.loadFriends() as List<AppUser> ;
+
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
@@ -56,46 +66,44 @@ class ProfileService {
             .get();
         albumCount = albums.docs.length;
 
-         int totalMemories = 0;
+        int totalMemories = 0;
         for (var album in albums.docs) {
           int itemCount = await album.reference.collection('media').count().get().then((value) => value.count!);
-            totalMemories += itemCount;
+          totalMemories += itemCount;
         }
         memoriesCount = totalMemories;
+
+        for (var friend in friends) {
+          final sharedAlbums = await FirebaseFirestore.instance
+              .collection('albums')
+              .where('userId', isEqualTo: friend.uid)
+              .get();
+          sharedAlbumCount = sharedAlbums.docs.length;
+          int totalsharedMemories = 0;
+          for (var sharedAlbum in sharedAlbums.docs) {
+            int itemCount = await sharedAlbum.reference.collection('media').count().get().then((value) => value.count!);
+            totalsharedMemories += itemCount;
+          }
+          sharedMemoriesCount = totalsharedMemories;
+        }
       }
+
     } catch (e) {
       print("Erreur lors du chargement des comptes : $e");
     }
-    return {'albumCount': albumCount, 'memoriesCount': memoriesCount};
+    return {'albumCount': albumCount, 'memoriesCount': memoriesCount, 'sharedAlbumCount': sharedAlbumCount, 'sharedMemoriesCount': sharedMemoriesCount};
   }
 
-  Future<Map<String, dynamic>> pickAndUploadProfileImage(
-      String? currentImageUrl) async {
+  Future<Map<String, dynamic>> pickAndUploadProfileImage(String? currentImageUrl) async {
     File? selectedImage;
     String? imageUrl;
     try {
-      final picker = ImagePicker();
-      final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-
-      if (pickedFile != null) {
-        final croppedFile = await ImageCropper().cropImage(
-          sourcePath: pickedFile.path,
-          aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
-          compressQuality: 100,
-          maxWidth: 700,
-          maxHeight: 700,
-          uiSettings: [
-            AndroidUiSettings(
-              toolbarTitle: 'Recadrer l\'image',
-              toolbarColor: Colors.blue,
-              toolbarWidgetColor: Colors.white,
-              lockAspectRatio: true,
-              cropStyle: CropStyle.circle,
-            )
-          ],
-        );
-
-        if (croppedFile != null) {
+      // Vérifier si nous sommes sur le web
+      if (kIsWeb) {
+        // Utiliser la méthode de sélection d'image pour le web
+        final pickedFile = await ImagePicker.platform.pickImage(source: ImageSource.gallery);
+        if (pickedFile != null) {
+          selectedImage = File(pickedFile.path);
           final user = FirebaseAuth.instance.currentUser;
           if (user != null) {
             if (currentImageUrl != null) {
@@ -103,19 +111,62 @@ class ProfileService {
               await oldImageRef.delete();
             }
 
-            final File imageFile = File(croppedFile.path);
-            final String fileName = '${user.uid}_${DateTime.now().millisecondsSinceEpoch}.jpg';
-            final Reference storageRef = FirebaseStorage.instance.ref().child('user_images/$fileName');
-
-            final UploadTask uploadTask = storageRef.putFile(imageFile);
-            final TaskSnapshot taskSnapshot = await uploadTask;
-            final String downloadUrl = await taskSnapshot.ref.getDownloadURL();
-            selectedImage = imageFile;
-            imageUrl = downloadUrl;
+            final fileName = '${user.uid}_${DateTime.now().millisecondsSinceEpoch}.jpg';
+            final storageRef = FirebaseStorage.instance.ref().child('user_images/$fileName');
+            final uploadTask = storageRef.putData(await selectedImage!.readAsBytes());
+            final taskSnapshot = await uploadTask;
+            imageUrl = await taskSnapshot.ref.getDownloadURL();
 
             await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
-              'profilePicture': downloadUrl,
+              'profilePicture': imageUrl,
             });
+          }
+        }
+      } else {
+        // Utiliser la méthode de sélection d'image pour les autres plateformes
+        final picker = ImagePicker();
+        final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+        if (pickedFile != null) {
+          final croppedFile = await ImageCropper().cropImage(
+            sourcePath: pickedFile.path,
+            aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
+            compressQuality: 100,
+            maxWidth: 700,
+            maxHeight: 700,
+            uiSettings: [
+              AndroidUiSettings(
+                toolbarTitle: 'Recadrer l\'image',
+                toolbarColor: Colors.blue,
+                toolbarWidgetColor: Colors.white,
+                lockAspectRatio: true,
+                cropStyle: CropStyle.circle,
+              )
+            ],
+          );
+
+          if (croppedFile != null) {
+            final user = FirebaseAuth.instance.currentUser;
+            if (user != null) {
+              if (currentImageUrl != null) {
+                final oldImageRef = FirebaseStorage.instance.refFromURL(currentImageUrl);
+                await oldImageRef.delete();
+              }
+
+              final File imageFile = File(croppedFile.path);
+              final String fileName = '${user.uid}_${DateTime.now().millisecondsSinceEpoch}.jpg';
+              final Reference storageRef = FirebaseStorage.instance.ref().child('user_images/$fileName');
+
+              final UploadTask uploadTask = storageRef.putFile(imageFile);
+              final TaskSnapshot taskSnapshot = await uploadTask;
+              final String downloadUrl = await taskSnapshot.ref.getDownloadURL();
+              selectedImage = imageFile;
+              imageUrl = downloadUrl;
+
+              await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
+                'profilePicture': downloadUrl,
+              });
+            }
           }
         }
       }
@@ -124,6 +175,7 @@ class ProfileService {
     }
     return {'selectedImage': selectedImage, 'imageUrl': imageUrl};
   }
+
 
   Future<bool> updateProfile(String username, String? imageUrl) async {
     try {

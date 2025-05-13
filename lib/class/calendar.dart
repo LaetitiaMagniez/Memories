@@ -11,7 +11,8 @@ import 'package:intl/date_symbol_data_local.dart';
 
 
 class CalendarPage extends StatefulWidget {
-  const CalendarPage({super.key});
+  CalendarPage({super.key});
+
 
   @override
   _CalendarPageState createState() => _CalendarPageState();
@@ -34,7 +35,8 @@ class _CalendarPageState extends State<CalendarPage> {
   }
 
   void _loadSouvenirs() {
-    getAllSouvenirsForUser().listen((newSouvenirs) {
+    final SouvenirService souvenirService = SouvenirService();
+    souvenirService.getAllSouvenirsForUser().listen((newSouvenirs) {
       setState(() {
         souvenirs = _groupSouvenirsByDate(newSouvenirs);
         _selectedEvents.value = _getEventsForDay(_selectedDay!);
