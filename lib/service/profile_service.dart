@@ -35,18 +35,20 @@ class ProfileService {
 
   Future<Map<String, dynamic>> loadUserData() async {
     try {
-      final user = _auth.currentUser;
+      final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
-        final userData =
-            await _firestore.collection('users').doc(user.uid).get();
+        final userData = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get();
         if (userData.exists) {
-          return userData.data() as Map<String, dynamic>;
+          return userData.data()!;
         }
       }
       return {};
     } catch (e) {
-      print("Erreur lors du chargement des données : $e");
-      return {};
+      print("Erreur lors du chargement des données de l'utilisateur : $e");
+      rethrow;
     }
   }
 
@@ -55,43 +57,50 @@ class ProfileService {
     int memoriesCount = 0;
     int sharedAlbumCount = 0;
     int sharedMemoriesCount = 0;
-    friends = contactService.loadFriends() as List<AppUser> ;
 
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
-        final albums = await FirebaseFirestore.instance
+        // Récupérer les albums de l'utilisateur
+        final albumsSnapshot = await FirebaseFirestore.instance
             .collection('albums')
             .where('userId', isEqualTo: user.uid)
             .get();
-        albumCount = albums.docs.length;
+        albumCount = albumsSnapshot.docs.length;
 
+        // Récupérer le nombre total de souvenirs de l'utilisateur
         int totalMemories = 0;
-        for (var album in albums.docs) {
+        for (var album in albumsSnapshot.docs) {
           int itemCount = await album.reference.collection('media').count().get().then((value) => value.count!);
           totalMemories += itemCount;
         }
         memoriesCount = totalMemories;
 
-        for (var friend in friends) {
-          final sharedAlbums = await FirebaseFirestore.instance
-              .collection('albums')
-              .where('userId', isEqualTo: friend.uid)
-              .get();
-          sharedAlbumCount = sharedAlbums.docs.length;
-          int totalsharedMemories = 0;
-          for (var sharedAlbum in sharedAlbums.docs) {
-            int itemCount = await sharedAlbum.reference.collection('media').count().get().then((value) => value.count!);
-            totalsharedMemories += itemCount;
-          }
-          sharedMemoriesCount = totalsharedMemories;
-        }
-      }
+        // Récupérer les albums partagés avec l'utilisateur
+        final sharedAlbumsSnapshot = await FirebaseFirestore.instance
+            .collection('albums')
+            .where('sharedWith', arrayContains: user.uid)
+            .get();
+        sharedAlbumCount = sharedAlbumsSnapshot.docs.length;
 
+        // Récupérer le nombre total de souvenirs partagés avec l'utilisateur
+        int totalSharedMemories = 0;
+        for (var sharedAlbum in sharedAlbumsSnapshot.docs) {
+          int itemCount = await sharedAlbum.reference.collection('media').count().get().then((value) => value.count!);
+          totalSharedMemories += itemCount;
+        }
+        sharedMemoriesCount = totalSharedMemories;
+      }
     } catch (e) {
       print("Erreur lors du chargement des comptes : $e");
     }
-    return {'albumCount': albumCount, 'memoriesCount': memoriesCount, 'sharedAlbumCount': sharedAlbumCount, 'sharedMemoriesCount': sharedMemoriesCount};
+
+    return {
+      'albumCount': albumCount,
+      'memoriesCount': memoriesCount,
+      'sharedAlbumCount': sharedAlbumCount,
+      'sharedMemoriesCount': sharedMemoriesCount
+    };
   }
 
   Future<Map<String, dynamic>> pickAndUploadProfileImage(String? currentImageUrl) async {

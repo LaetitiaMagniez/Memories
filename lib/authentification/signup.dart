@@ -1,12 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:memories_project/service/contact_service.dart';
-import 'package:memories_project/transition/loadingScreen.dart';
-import 'package:memories_project/screens/user/profile.dart';
-import 'package:memories_project/service/profile_service.dart';
+import 'package:flutter/material.dart';
+import 'package:memories_project/service/authentification_service.dart';
 
-
+import '../home.dart';
 
 class SignUpPage extends StatefulWidget {
     const SignUpPage({super.key});
@@ -16,64 +12,67 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
-  final _formKey = GlobalKey<FormState>();
+  final AuthentificationService authentificationService = AuthentificationService();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  final FocusNode _passwordFocusNode = FocusNode();
 
+  bool _showPasswordStrengthInfo = false;
   bool _isLoading = false;
   bool _isPasswordVisible = false;
-  bool _isConfirmPasswordVisible = false; 
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final ContactService _contactService = ContactService();
+  bool _isConfirmPasswordVisible = false;
+  double _passwordStrength = 0;
 
+  @override
+  void initState() {
+    super.initState();
+    _passwordFocusNode.addListener(() {
+      setState(() {
+        _showPasswordStrengthInfo = _passwordFocusNode.hasFocus;
+      });
+    });
+  }
 
-  Future<void> _signUp() async {
+  @override
+  void dispose() {
+    _passwordFocusNode.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> login(BuildContext context) async {
     if (_formKey.currentState!.validate()) {
-      Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => LoadingScreen(message: 'Création de votre compte'),
-      ));
-
+      setState(() {
+        _isLoading = true;
+      });
       try {
-        // Créer l'utilisateur avec Firebase Auth
-        UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+        await _auth.signInWithEmailAndPassword(
           email: _emailController.text.trim(),
           password: _passwordController.text.trim(),
         );
 
-        String email =_emailController.text.trim();
-
-        final user = userCredential.user!;
-
-        // Vérifier si l'utilisateur a été invité via un lien unique
-        final Uri uri = Uri.parse(ModalRoute.of(context)!.settings.arguments as String);
-        final String? code = uri.queryParameters['code'];
-
-        if (code != null) {
-          // Cas avec code d'invitation
-          await _handleInvitedSignUp(user.uid, code, email);
-        } else {
-          // Cas classique sans code d'invitation
-          await _handleRegularSignUp(user.uid,email);
-        }
+        // Sauvegarder l'état "Se souvenir de moi" si nécessaire
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Inscription réussie')),
+          SnackBar(content: Text('Connexion réussie')),
         );
-
-        // Naviguer vers une autre page ou réinitialiser les champs
         Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => ProfilePage()),
+          MaterialPageRoute(builder: (context) => HomeScreen()),
               (Route<dynamic> route) => false,
         );
       } on FirebaseAuthException catch (e) {
         String message;
         switch (e.code) {
-          case 'email-already-in-use':
-            message = "L'email est déjà utilisé.";
+          case 'user-not-found':
+            message = "Utilisateur non trouvé.";
             break;
-          case 'weak-password':
-            message = "Le mot de passe est trop faible.";
+          case 'wrong-password':
+            message = "Mot de passe incorrect.";
             break;
           default:
             message = "Une erreur est survenue : ${e.message}";
@@ -89,159 +88,207 @@ class _SignUpPageState extends State<SignUpPage> {
     }
   }
 
-  Future<void> _handleInvitedSignUp(String userId, String code, String mail) async {
-    // Vérifier si le code existe dans Firestore
-    final inviteCodeDoc = await FirebaseFirestore.instance
-        .collection('invite_codes')
-        .doc(code)
-        .get();
-
-    if (inviteCodeDoc.exists) {
-      // Récupérer l'ID de l'utilisateur qui a envoyé le lien
-      final String inviterUserId = inviteCodeDoc.data()!['userId'];
-
-      // Ajouter le nouveau compte en tant qu'ami à l'utilisateur qui a envoyé le lien
-      await _contactService.addFriend(userId, inviterUserId);
-
-      // Supprimer le code unique de Firestore
-      await FirebaseFirestore.instance
-          .collection('invite_codes')
-          .doc(code)
-          .delete();
-    }
-
-    // Ajouter l'utilisateur dans la collection Firestore
-    await FirebaseFirestore.instance.collection('users').doc(userId).set({
-      'email': mail,
-      'createdAt': FieldValue.serverTimestamp(),
-      'profilePicture': null,
-      'role': 'Propriétaire'
-    });
+  Widget _buildPasswordCondition({required bool condition, required String text}) {
+    return Row(
+      children: [
+        Icon(
+          condition ? Icons.check_circle : Icons.cancel,
+          color: condition ? Colors.green : Colors.red,
+          size: 20,
+        ),
+        SizedBox(width: 8),
+        Text(
+          text,
+          style: TextStyle(
+            color: condition ? Colors.green : Colors.red,
+            fontSize: 14,
+          ),
+        ),
+      ],
+    );
   }
 
-  Future<void> _handleRegularSignUp(String userId, String mail) async {
-    // Ajouter l'utilisateur dans la collection Firestore
-    await FirebaseFirestore.instance.collection('users').doc(userId).set({
-      'email': mail,
-      'createdAt': FieldValue.serverTimestamp(),
-      'profilePicture': null,
-      'role': 'Propriétaire'
-    });
+  Widget buildPasswordField(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextFormField(
+          controller: _passwordController,
+          focusNode: _passwordFocusNode,
+          decoration: InputDecoration(
+            labelText: 'Mot de passe',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            suffixIcon: IconButton(
+              icon: Icon(
+                _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+              ),
+              onPressed: () {
+                setState(() {
+                  _isPasswordVisible = !_isPasswordVisible;
+                });
+              },
+            ),
+          ),
+          obscureText: !_isPasswordVisible,
+          onChanged: (value) {
+            setState(() {
+              _passwordStrength = authentificationService.calculatePasswordStrength(value);
+            });
+          },
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return "Veuillez entrer un mot de passe.";
+            }
+            if (value.length < 8) {
+              return "Le mot de passe doit contenir au moins 8 caractères.";
+            }
+            if (!RegExp(r'[0-9]').hasMatch(value)) {
+              return "Le mot de passe doit contenir au moins un chiffre.";
+            }
+            if (!RegExp(r'[!@#$%^&*(),.?\":{}|<>]').hasMatch(value)) {
+              return "Le mot de passe doit contenir au moins un caractère spécial.";
+            }
+            return null;
+          },
+        ),
+        if (_showPasswordStrengthInfo) ...[
+          SizedBox(height: 8.0),
+          LinearProgressIndicator(
+            value: _passwordStrength,
+            backgroundColor: Colors.grey[300],
+            valueColor: AlwaysStoppedAnimation<Color>(
+              _passwordStrength < 0.5
+                  ? Colors.red
+                  : _passwordStrength < 0.75
+                  ? Colors.orange
+                  : Colors.green,
+            ),
+          ),
+          SizedBox(height: 8.0),
+          Text(
+            authentificationService.getPasswordStrengthText(_passwordStrength),
+            style: TextStyle(
+              color: _passwordStrength < 0.5
+                  ? Colors.red
+                  : _passwordStrength < 0.75
+                  ? Colors.orange
+                  : Colors.green,
+            ),
+          ),
+          SizedBox(height: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildPasswordCondition(
+                condition: _passwordController.text.length >= 8,
+                text: "Au moins 8 caractères",
+              ),
+              _buildPasswordCondition(
+                condition: RegExp(r'[0-9]').hasMatch(_passwordController.text),
+                text: "Contient au moins un chiffre",
+              ),
+              _buildPasswordCondition(
+                condition: RegExp(r'[!@#$%^&*(),.?\":{}|<>]').hasMatch(_passwordController.text),
+                text: "Contient au moins un caractère spécial",
+              ),
+            ],
+          ),
+        ],
+
+      ],
+    );
   }
 
-  Future<void> _addFriendToUser(String userId, String inviterUserId) async {
-    // Ajouter le nouveau compte en tant qu'ami à l'utilisateur qui a envoyé le lien
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(inviterUserId)
-        .collection('friends')
-        .doc(userId)
-        .set({'createdAt': FieldValue.serverTimestamp()});
-  }
-
-
-        @override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Pas encore de compte ? Inscrivez-vous'),
+        title: const Text('Pas encore de compte ?'),
       ),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              TextFormField(
-                controller: _emailController,
-                decoration: InputDecoration(labelText: 'Email'),
-                keyboardType: TextInputType.emailAddress,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return "Veuillez entrer un email.";
-                  }
-                  if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-                    return "Veuillez entrer un email valide.";
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 16.0),
-              TextFormField(
-              controller: _passwordController,
-              decoration: InputDecoration(
-                labelText: 'Mot de passe',
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    _isPasswordVisible
-                        ? Icons.visibility
-                        : Icons.visibility_off,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      _isPasswordVisible = !_isPasswordVisible;
-                    });
-                  },
-                ),
-              ),
-              obscureText: !_isPasswordVisible,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return "Veuillez entrer un mot de passe.";
-                }
-                if (value.length < 6) {
-                  return "Le mot de passe doit contenir au moins 6 caractères.";
-                }
-                return null;
-              },
-              ),
-              SizedBox(height: 16.0),
-              TextFormField(
-              controller: _confirmPasswordController,
-              decoration: InputDecoration(
-                labelText: 'Confirmer votre mot de passe',
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    _isConfirmPasswordVisible
-                        ? Icons.visibility
-                        : Icons.visibility_off,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
-                    });
-                  },
-                ),
-              ),
-              obscureText: !_isConfirmPasswordVisible,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return "Veuillez confirmer votre mot de passe.";
-                }
-                if (value != _passwordController.text) {
-                  return "Les mots de passe ne correspondent pas.";
-                }
-                return null;
-              },
-              ),
-
-              SizedBox(height: 24),
-              _isLoading
-                  ? Center(child: CircularProgressIndicator())
-                  : ElevatedButton(
-                      onPressed: _signUp,
-                      style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                      child: Text("S'inscrire")
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                TextFormField(
+                  controller: _emailController,
+                  decoration: InputDecoration(
+                    labelText: 'Email',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
-            ],
+                  ),
+                  keyboardType: TextInputType.emailAddress,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "Veuillez entrer un email.";
+                    }
+                    if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+                      return "Veuillez entrer un email valide.";
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                buildPasswordField(context),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _confirmPasswordController,
+                  decoration: InputDecoration(
+                    labelText: 'Confirmer votre mot de passe',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _isConfirmPasswordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
+                        });
+                      },
+                    ),
+                  ),
+                  obscureText: !_isConfirmPasswordVisible,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "Veuillez confirmer votre mot de passe.";
+                    }
+                    if (value != _passwordController.text) {
+                      return "Les mots de passe ne correspondent pas.";
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 24),
+                _isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : ElevatedButton(
+                  onPressed: () async {
+                    await login(context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text('S\'inscrire'),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
+
 }

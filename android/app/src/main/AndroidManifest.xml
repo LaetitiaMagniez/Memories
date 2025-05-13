@@ -12,7 +12,7 @@
     <uses-permission android:name="android.permission.SEND_SMS"/>
 
     <application
-        android:label="memories_project"
+        android:label="Memories"
         android:icon="@mipmap/ic_launcher">
         <meta-data android:name="com.google.android.geo.API_KEY"
         android:value="${GOOGLE_API_KEY}"
@@ -44,10 +44,6 @@
             </intent-filter>
 
         </activity>
-        <activity
-            android:name="com.yalantis.ucrop.UCropActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />

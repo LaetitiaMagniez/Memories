@@ -1,7 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:memories_project/password/forgottenPassword.dart';
-import 'package:memories_project/home.dart';
+import 'package:memories_project/service/authentification_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../home.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -12,33 +14,46 @@ class Login extends StatefulWidget {
 
 class _LoginState extends State<Login> {
   final _formKey = GlobalKey<FormState>();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final AuthentificationService authentificationService = AuthentificationService();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  bool _isPasswordVisible = false;
   bool _isLoading = false;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  bool _isPasswordVisible = false;
+  bool _rememberMe = false;
 
+  @override
+  void initState() {
+    super.initState();
+    authentificationService.loadRememberMeState();
+  }
 
-  Future<void> _login() async {
+  Future<void> login(BuildContext context) async {
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;
       });
-
       try {
         await _auth.signInWithEmailAndPassword(
           email: _emailController.text.trim(),
           password: _passwordController.text.trim(),
         );
+
+        // Sauvegarder l'état "Se souvenir de moi" si nécessaire
+        if (_rememberMe) {
+          await authentificationService.saveRememberMeState(true, _emailController.text.trim(), _passwordController.text.trim());
+        } else {
+          await authentificationService.saveRememberMeState(false, '', '');
+        }
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Connexion réussie')),
         );
         Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => HomeScreen()),
-        (Route<dynamic> route) => false,
-      );
-        
+          MaterialPageRoute(builder: (context) => HomeScreen()),
+              (Route<dynamic> route) => false,
+        );
       } on FirebaseAuthException catch (e) {
         String message;
         switch (e.code) {
@@ -62,11 +77,13 @@ class _LoginState extends State<Login> {
     }
   }
 
-  
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text('Connexion'),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -77,17 +94,6 @@ class _LoginState extends State<Login> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const SizedBox(height: 50),
-                  Text(
-                    'Bienvenue sur Memories',
-                    style: Theme.of(context).textTheme.headlineMedium,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 50),
-                  Text('Créez vos albums souvenirs',
-                    style: Theme.of(context).textTheme.titleLarge,
-                    textAlign: TextAlign.center,
-                  ),
                   const SizedBox(height: 20),
                   TextFormField(
                     controller: _emailController,
@@ -133,28 +139,44 @@ class _LoginState extends State<Login> {
                       return null;
                     },
                   ),
+                  Row(
+                    children: [
+                      Checkbox(
+                        value: _rememberMe,
+                        onChanged: (value) {
+                          setState(() {
+                            _rememberMe = value!;
+                          });
+                        },
+                      ),
+                      const Text('Se souvenir de moi'),
+                    ],
+                  ),
                   const SizedBox(height: 24),
                   _isLoading
-                    ? Center(child: CircularProgressIndicator())
-                    : ElevatedButton(
-                        onPressed: _login,
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: Text('Se connecter'),
+                      ? Center(child: CircularProgressIndicator())
+                      : ElevatedButton(
+                    onPressed: () async {
+                      await login(context);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
+                    ),
+                    child: Text('Se connecter'),
+                  ),
                   TextButton(
                     onPressed: () {
                       Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => ForgottenPasswordPage()),
-                  );
+                        context,
+                        MaterialPageRoute(builder: (context) => ForgottenPasswordPage()),
+                      );
                     },
-                    child: Text('Mot de passe oublié ?'),
+                    child: Text('Mot de passe oublié'),
                   ),
+
                 ],
               ),
             ),
