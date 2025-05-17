@@ -16,30 +16,20 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
 
-      - name: Install Flutter
+      - name: Build Docker Image
         run: |
-          git clone https://github.com/flutter/flutter.git -b stable
-          echo "$GITHUB_WORKSPACE/flutter/bin" >> $GITHUB_PATH
-          flutter doctor -v
+            docker build -t flutter-firebase-image . 
 
-      - name: Install Dependencies
-        run: flutter pub get
-
-      - name: Build Flutter Web
-        run: flutter build web --release
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
+      - name: Build and Deploy to Firebase Hosting
+        uses: docker://ghcr.io/your-username/flutter-firebase-image:latest
         with:
-          node-version: '21.1.0'  # Ensure compatibility with Firebase CLI
-
-      - name: Install Firebase CLI
-        run: npm install -g firebase-tools
-
-      - name: Deploy to Firebase Hosting
-        run: firebase deploy --only hosting --project <firebase-project-id>
+          args: |
+            flutter pub get
+            flutter build web --release
+            firebase deploy --only hosting --project memories-7bdc6
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+
 
       - name: Set up Environment Variables
         run: echo "VARIABLE_NAME=value" >> $GITHUB_ENV
