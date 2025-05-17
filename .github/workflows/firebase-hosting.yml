@@ -21,7 +21,7 @@ jobs:
             docker build -t flutter-firebase-image . 
 
       - name: Build and Deploy to Firebase Hosting
-        uses: docker://ghcr.io/your-username/flutter-firebase-image:latest
+        uses: docker://flutter-firebase-image
         with:
           args: |
             flutter pub get
