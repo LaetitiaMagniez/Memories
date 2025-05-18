@@ -28,6 +28,22 @@ jobs:
             lmagniez03/flutter-firebase:latest \
             git config --global --add safe.directory /opt/flutter
 
+      - name: Change Permissions for Flutter Directory
+        run: |
+          docker run --rm \
+            -v ${{ github.workspace }}:/app \
+            -w /app \
+            lmagniez03/flutter-firebase:latest \
+            bash -c "sudo chown -R $UID:$GID /opt/flutter"
+
+      - name: Verify Flutter Directory Permissions
+        run: |
+          docker run --rm \
+            -v ${{ github.workspace }}:/app \
+            -w /app \
+            lmagniez03/flutter-firebase:latest \
+            bash -c "ls -l /opt/flutter"
+
       - name: Check Flutter Version
         run: |
           docker run --rm \
@@ -64,5 +80,4 @@ jobs:
 
       - name: Set up Environment Variables (optionnel)
         run: |
-          echo "GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }}" >> $GITHUB_ENV
-          echo "NINJA_API_KEY=${{ secrets.NINJA_API_KEY }}" >> $GITHUB_ENV
+          echo "GOOGLE_API_KEY=${{ secrets.
