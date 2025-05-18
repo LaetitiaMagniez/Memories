@@ -33,8 +33,10 @@ jobs:
           docker run --rm --user root \
             -v ${{ github.workspace }}:/app \
             -w /app \
+            -e UID=$(id -u) \
+            -e GID=$(id -g) \
             lmagniez03/flutter-firebase:latest \
-            bash -c "chown -R $UID:$GID /opt/flutter"
+            bash -c "chown -R ${UID}:${GID} /opt/flutter"
 
       - name: Verify Flutter Directory Permissions
         run: |
