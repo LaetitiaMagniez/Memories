@@ -16,7 +16,7 @@ RUN apt-get update && apt-get install -y \
   && apt-get clean
 
 # Installer Flutter
-ENV FLUTTER_VERSION=3.29.3
+ENV FLUTTER_VERSION=3.29.2
 ENV DART_VERSION=3.7.2
 ENV FLUTTER_HOME=/opt/flutter
 
