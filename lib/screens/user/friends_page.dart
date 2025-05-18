@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../classes/appUser.dart';
-import '../../service/contact_service.dart';
+import '../../models/app_user.dart';
+import '../../services/contact_service.dart';
 
 class FriendsPage extends StatefulWidget {
   @override

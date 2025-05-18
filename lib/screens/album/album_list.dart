@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:memories_project/classes/album.dart';
+import 'package:memories_project/models/album.dart';
 import 'package:memories_project/screens/album/album_details.dart';
-import 'package:memories_project/service/album_service.dart';
-import 'package:memories_project/service/contact_service.dart';
-import 'package:memories_project/service/firestore_service.dart';
-import '../../classes/appUser.dart';
+import 'package:memories_project/services/album_service.dart';
+import 'package:memories_project/services/contact_service.dart';
+import 'package:memories_project/services/firestore_service.dart';
+import '../../models/app_user.dart';
 import 'album_thumbnail.dart';
 
 class AlbumListPage extends StatefulWidget {

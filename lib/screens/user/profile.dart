@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:memories_project/screens/user/friendsPage.dart';
-import 'package:memories_project/service/profile_service.dart';
+import 'package:memories_project/screens/user/friends_page.dart';
+import 'package:memories_project/services/profile_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:io';
-import 'package:memories_project/transition/loadingScreen.dart';
-import '../../classes/statCard.dart';
+import 'package:memories_project/transition/loading_screen.dart';
+import '../../models/stat_card.dart';
 import 'package:provider/provider.dart';
 import 'package:memories_project/providers/theme_provider.dart';
 

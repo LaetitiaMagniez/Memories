@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:memories_project/classes/souvenir.dart';
-import 'package:memories_project/service/firestore_service.dart';
-import 'package:memories_project/service/souvenir_service.dart';
+import 'package:memories_project/models/souvenir.dart';
+import 'package:memories_project/services/firestore_service.dart';
+import 'package:memories_project/services/souvenir_service.dart';
 import '../../souvenir_view/full_screen_image_view.dart';
 import '../../souvenir_view/video_thumbnail_widget.dart';
 import '../../souvenir_view/video_viewer.dart';

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:memories_project/password/resetPassword.dart';
+import 'package:memories_project/password/reset_password.dart';
 import 'package:provider/provider.dart';
 import '../authentification/auth_gate.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';

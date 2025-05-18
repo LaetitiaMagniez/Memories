@@ -6,7 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:memories_project/classes/souvenir.dart';
+import 'package:memories_project/models/souvenir.dart';
 import 'package:intl/intl.dart';
 
 class SouvenirService {

@@ -3,7 +3,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:memories_project/classes/souvenir.dart';
+import 'package:memories_project/models/souvenir.dart';
 import 'package:memories_project/souvenir_view/full_screen_image_view.dart';
 import 'package:memories_project/souvenir_view/video_thumbnail_widget.dart';
 import 'package:memories_project/souvenir_view/video_viewer.dart';

@@ -7,10 +7,10 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:memories_project/authentification/auth_gate.dart';
-import 'package:memories_project/service/contact_service.dart';
-import 'package:memories_project/transition/loadingScreen.dart';
+import 'package:memories_project/services/contact_service.dart';
+import 'package:memories_project/transition/loading_screen.dart';
 
-import '../classes/appUser.dart';
+import '../models/app_user.dart';
 
 class ProfileService {
   final FirebaseAuth _auth = FirebaseAuth.instance;

@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:memories_project/password/forgottenPassword.dart';
-import 'package:memories_project/service/authentification_service.dart';
+import 'package:memories_project/password/forgotten_password.dart';
+import 'package:memories_project/services/authentification_service.dart';
 import '../home.dart';
 
 class Login extends StatefulWidget {

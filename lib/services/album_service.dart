@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:memories_project/classes/album.dart';
+import 'package:memories_project/models/album.dart';
 import 'package:memories_project/screens/album/album_details.dart';
 import 'package:memories_project/screens/album/album_list.dart';
-import 'package:memories_project/transition/loadingScreen.dart';
+import 'package:memories_project/transition/loading_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';

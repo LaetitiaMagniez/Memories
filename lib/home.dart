@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:memories_project/screens/album/album_list.dart';
-import 'package:memories_project/classes/calendar.dart';
+import 'package:memories_project/models/calendar.dart';
 import 'package:memories_project/screens/map.dart';
 import 'package:memories_project/screens/user/profile.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';

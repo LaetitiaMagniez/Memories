@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:share_plus/share_plus.dart';
 import 'dart:math';
 
-import '../classes/appUser.dart';
+import '../models/app_user.dart';
 
 class ContactService {
   AppUser? _currentUser;
