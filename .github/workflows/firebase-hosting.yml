@@ -80,4 +80,5 @@ jobs:
 
       - name: Set up Environment Variables (optionnel)
         run: |
-          echo "GOOGLE_API_KEY=${{ secrets.
+          echo "GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }}" >> $GITHUB_ENV
+          echo "NINJA_API_KEY=${{ secrets.NINJA_API_KEY }}" >> $GITHUB_ENV
