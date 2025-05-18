@@ -21,12 +21,12 @@ jobs:
 
       - name: Pull and Use Prebuilt Docker Image
         run: |
-          docker pull lmagniez03/flutter-firebase:latest
+          docker pull ghcr.io/lmagniez03/flutter-firebase:latest
           docker run --rm \
             -v ${{ github.workspace }}:/app \
             -w /app \
             -e FIREBASE_TOKEN=${{ secrets.FIREBASE_TOKEN }} \
-            lmagniez03/flutter-firebase:latest \
+            ghcr.io/lmagniez03/flutter-firebase:latest \
             bash -c "
               flutter pub get &&
               flutter build web --release &&
