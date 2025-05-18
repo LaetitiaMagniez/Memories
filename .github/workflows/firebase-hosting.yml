@@ -30,15 +30,15 @@ jobs:
 
       - name: Change Permissions for Flutter Directory
         run: |
-          docker run --rm \
+          docker run --rm --user root \
             -v ${{ github.workspace }}:/app \
             -w /app \
             lmagniez03/flutter-firebase:latest \
-            bash -c "sudo chown -R $UID:$GID /opt/flutter"
+            bash -c "chown -R $UID:$GID /opt/flutter"
 
       - name: Verify Flutter Directory Permissions
         run: |
-          docker run --rm \
+          docker run --rm --user root \
             -v ${{ github.workspace }}:/app \
             -w /app \
             lmagniez03/flutter-firebase:latest \
