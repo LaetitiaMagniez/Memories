@@ -22,7 +22,7 @@ jobs:
 
       - name: Configure Safe Directory
         run: |
-          docker run --rm \
+          docker run --rm --user root \
             -v ${{ github.workspace }}:/app \
             -w /app \
             lmagniez03/flutter-firebase:latest \
@@ -33,10 +33,8 @@ jobs:
           docker run --rm --user root \
             -v ${{ github.workspace }}:/app \
             -w /app \
-            -e UID=$(id -u) \
-            -e GID=$(id -g) \
             lmagniez03/flutter-firebase:latest \
-            bash -c "chown -R ${UID}:${GID} /opt/flutter"
+            bash -c "chown -R 1001:1001 /opt/flutter"
 
       - name: Verify Flutter Directory Permissions
         run: |
@@ -48,7 +46,7 @@ jobs:
 
       - name: Check Flutter Version
         run: |
-          docker run --rm \
+          docker run --rm --user root \
             -v ${{ github.workspace }}:/app \
             -w /app \
             lmagniez03/flutter-firebase:latest \
@@ -56,7 +54,7 @@ jobs:
 
       - name: Debug Environment
         run: |
-          docker run --rm \
+          docker run --rm --user root \
             -v ${{ github.workspace }}:/app \
             -w /app \
             lmagniez03/flutter-firebase:latest \
@@ -64,7 +62,7 @@ jobs:
 
       - name: Run Commands Manually
         run: |
-          docker run --rm \
+          docker run --rm --user root \
             -v ${{ github.workspace }}:/app \
             -w /app \
             -e FIREBASE_TOKEN=${{ secrets.FIREBASE_TOKEN }} \
@@ -73,14 +71,14 @@ jobs:
 
       - name: Deploy to Firebase Hosting
         run: |
-          docker run --rm \
+          docker run --rm --user root \
             -v ${{ github.workspace }}:/app \
             -w /app \
             -e FIREBASE_TOKEN=${{ secrets.FIREBASE_TOKEN }} \
             lmagniez03/flutter-firebase:latest \
             bash -c "flutter pub get && flutter build web --release && firebase deploy --only hosting --project memories-7bdc6"
 
-      - name: Set up Environment Variables (optionnel)
+      - name: Set up Environment Variables
         run: |
           echo "GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }}" >> $GITHUB_ENV
           echo "NINJA_API_KEY=${{ secrets.NINJA_API_KEY }}" >> $GITHUB_ENV
