@@ -16,16 +16,16 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
 
-      - name: Pull and Use Docker Hub Image
+      - name: Build Docker Image
         run: |
-          docker pull lmagniez03/flutter:latest
+          docker build -t lmagniez03/flutter:latest .
 
       - name: Configure Safe Directory
         run: |
           docker run --rm --user root \
             -v ${{ github.workspace }}:/app \
             -w /app \
-           lmagniez03/flutter:latest \
+            lmagniez03/flutter:latest \
             git config --global --add safe.directory /opt/flutter
 
       - name: Change Permissions for Flutter Directory
@@ -59,14 +59,6 @@ jobs:
             -w /app \
             lmagniez03/flutter:latest \
             bash -c "flutter --version && dart --version"
-
-      - name: Remove sky_engine Dependency
-        run: |
-          docker run --rm --user root \
-            -v ${{ github.workspace }}:/app \
-            -w /app \
-            lmagniez03/flutter:latest \
-            bash -c "sed -i '/sky_engine/d' pubspec.yaml"
 
       - name: Debug Pub Dependencies
         run: |
