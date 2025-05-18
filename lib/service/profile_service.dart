@@ -10,7 +10,7 @@ import 'package:memories_project/authentification/auth_gate.dart';
 import 'package:memories_project/service/contact_service.dart';
 import 'package:memories_project/transition/loadingScreen.dart';
 
-import '../class/appUser.dart';
+import '../classes/appUser.dart';
 
 class ProfileService {
   final FirebaseAuth _auth = FirebaseAuth.instance;

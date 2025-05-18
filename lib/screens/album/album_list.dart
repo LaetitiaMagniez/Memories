@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:memories_project/class/album.dart';
+import 'package:memories_project/classes/album.dart';
 import 'package:memories_project/screens/album/album_details.dart';
 import 'package:memories_project/service/album_service.dart';
 import 'package:memories_project/service/contact_service.dart';
 import 'package:memories_project/service/firestore_service.dart';
-import '../../class/appUser.dart';
+import '../../classes/appUser.dart';
 import 'album_thumbnail.dart';
 
 class AlbumListPage extends StatefulWidget {

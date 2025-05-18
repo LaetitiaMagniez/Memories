@@ -1,6 +1,6 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/material.dart';
-import 'package:memories_project/class/souvenir.dart';
+import 'package:memories_project/classes/souvenir.dart';
 import 'package:memories_project/service/souvenir_service.dart';
 import 'package:memories_project/service/map_service.dart';
 

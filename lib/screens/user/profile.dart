@@ -5,7 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:io';
 import 'package:memories_project/transition/loadingScreen.dart';
-import '../../class/statCard.dart';
+import '../../classes/statCard.dart';
 import 'package:provider/provider.dart';
 import 'package:memories_project/providers/theme_provider.dart';
 

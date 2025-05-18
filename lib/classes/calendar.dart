@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:memories_project/class/souvenir.dart';
+import 'package:memories_project/classes/souvenir.dart';
 import 'package:memories_project/service/souvenir_service.dart';
 import 'package:memories_project/souvenir_view/full_screen_image_view.dart';
 import 'package:memories_project/souvenir_view/video_thumbnail_widget.dart';

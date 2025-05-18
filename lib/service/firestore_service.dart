@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:memories_project/class/album.dart';
-import '../class/appUser.dart';
-import '../class/souvenir.dart';
+import 'package:memories_project/classes/album.dart';
+import '../classes/appUser.dart';
+import '../classes/souvenir.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'contact_service.dart';
 

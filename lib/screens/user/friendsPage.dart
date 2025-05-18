@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../class/appUser.dart';
+import '../../classes/appUser.dart';
 import '../../service/contact_service.dart';
 
 class FriendsPage extends StatefulWidget {

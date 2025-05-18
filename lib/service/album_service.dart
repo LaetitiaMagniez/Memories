@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:memories_project/class/album.dart';
+import 'package:memories_project/classes/album.dart';
 import 'package:memories_project/screens/album/album_details.dart';
 import 'package:memories_project/screens/album/album_list.dart';
 import 'package:memories_project/transition/loadingScreen.dart';
