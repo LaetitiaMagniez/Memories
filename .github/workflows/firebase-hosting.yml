@@ -23,8 +23,7 @@ jobs:
             -v ${{ github.workspace }}:/app \
             -w /app \
             -e FIREBASE_TOKEN=${{ secrets.FIREBASE_TOKEN }} \
-            lmagniez03/flutter-firebase:latest \
-            bash -c "
+            lmagniez03/flutter-firebase:latest bash -c "
               flutter pub get &&
               flutter build web --release &&
               firebase deploy --only hosting --project memories-7bdc6
