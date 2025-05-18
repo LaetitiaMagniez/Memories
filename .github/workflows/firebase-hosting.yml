@@ -60,6 +60,14 @@ jobs:
             lmagniez03/flutter-firebase:latest \
             bash -c "flutter --version && dart --version"
 
+      - name: Remove sky_engine Dependency
+        run: |
+          docker run --rm --user root \
+            -v ${{ github.workspace }}:/app \
+            -w /app \
+            lmagniez03/flutter-firebase:latest \
+            bash -c "sed -i '/sky_engine/d' pubspec.yaml"
+
       - name: Debug Pub Dependencies
         run: |
           docker run --rm --user root \
