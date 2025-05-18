@@ -16,24 +16,24 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
 
-      - name: Build Docker Image
+      - name: Authenticate to GitHub Container Registry
+        run: echo "${{ secrets.CR_PAT }}" | docker login ghcr.io -u lmagniez03 --password-stdin
+
+      - name: Pull and Use Prebuilt Docker Image
         run: |
-            docker build -t flutter-firebase-image . 
+          docker pull ghcr.io/lmagniez03/flutter-firebase:latest
+          docker run --rm \
+            -v ${{ github.workspace }}:/app \
+            -w /app \
+            -e FIREBASE_TOKEN=${{ secrets.FIREBASE_TOKEN }} \
+            ghcr.io/lmagniez03/flutter-firebase:latest \
+            bash -c "
+              flutter pub get &&
+              flutter build web --release &&
+              firebase deploy --only hosting --project memories-7bdc6
+            "
 
-      - name: Build and Deploy to Firebase Hosting
-        uses: docker://flutter-firebase-image
-        with:
-          args: |
-            flutter pub get
-            flutter build web --release
-            firebase deploy --only hosting --project memories-7bdc6
-        env:
-          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
-
-
-      - name: Set up Environment Variables
-        run: echo "VARIABLE_NAME=value" >> $GITHUB_ENV
-        env:
-          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
-          NINJA_API_KEY: ${{ secrets.NINJA_API_KEY }}
-
+      - name: Set up Environment Variables (optionnel)
+        run: |
+          echo "GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }}" >> $GITHUB_ENV
+          echo "NINJA_API_KEY=${{ secrets.NINJA_API_KEY }}" >> $GITHUB_ENV
