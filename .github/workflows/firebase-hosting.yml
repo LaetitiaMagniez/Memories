@@ -60,9 +60,31 @@ jobs:
             lmagniez03/flutter-firebase:latest \
             bash -c "env"
 
+      - name: Check Flutter Logs
+        run: |
+          docker run --rm --user root \
+            -v ${{ github.workspace }}:/app \
+            -w /app \
+            lmagniez03/flutter-firebase:latest \
+            bash -c "flutter build web --release --verbose"
+
+      - name: Check Firebase Logs
+        run: |
+          docker run --rm --user root \
+            -v ${{ github.workspace }}:/app \
+            -w /app \
+            -e FIREBASE_TOKEN=${{ secrets.FIREBASE_TOKEN }} \
+            lmagniez03/flutter-firebase:latest \
+            bash -c "firebase deploy --only hosting --project memories-7bdc6 --debug"
+
       - name: Run Commands
         run: |
-          docker run --rm --user root -v ${{ github.workspace }}:/app -w /app -e FIREBASE_TOKEN=${{ secrets.FIREBASE_TOKEN }} lmagniez03/flutter-firebase:latest bash -c "flutter pub get && flutter build web --release && firebase deploy --only hosting --project memories-7bdc6"
+          docker run --rm --user root \
+            -v ${{ github.workspace }}:/app \
+            -w /app \
+            -e FIREBASE_TOKEN=${{ secrets.FIREBASE_TOKEN }} \
+            lmagniez03/flutter-firebase:latest \
+            bash -c "flutter pub get && flutter build web --release && firebase deploy --only hosting --project memories-7bdc6"
 
       - name: Deploy to Firebase Hosting
         run: |
