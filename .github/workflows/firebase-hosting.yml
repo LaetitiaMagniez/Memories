@@ -16,99 +16,23 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
 
-      - name: Build Docker Image
+      - name: Use Flutter Docker Image
         run: |
-          docker build -t lmagniez03/flutter:latest .
-
-      - name: Configure Safe Directory
-        run: |
-          docker run --rm --user root \
-            -v ${{ github.workspace }}:/app \
-            -w /app \
-            lmagniez03/flutter:latest \
-            git config --global --add safe.directory /opt/flutter
-
-      - name: Change Permissions for Flutter Directory
-        run: |
-          docker run --rm --user root \
-            -v ${{ github.workspace }}:/app \
-            -w /app \
-            lmagniez03/flutter:latest \
-            bash -c "chown -R 1001:1001 /opt/flutter"
-
-      - name: Clean Flutter Cache
-        run: |
-          docker run --rm --user root \
-            -v ${{ github.workspace }}:/app \
-            -w /app \
-            lmagniez03/flutter:latest \
-            bash -c "flutter clean"
-
-      - name: Verify Flutter Directory Permissions
-        run: |
-          docker run --rm --user root \
-            -v ${{ github.workspace }}:/app \
-            -w /app \
-            lmagniez03/flutter:latest \
-            bash -c "ls -l /opt/flutter"
-
-      - name: Check Flutter and Dart Versions
-        run: |
-          docker run --rm --user root \
-            -v ${{ github.workspace }}:/app \
-            -w /app \
-            lmagniez03/flutter:latest \
-            bash -c "flutter --version && dart --version"
-
-      - name: Debug Pub Dependencies
-        run: |
-          docker run --rm --user root \
-            -v ${{ github.workspace }}:/app \
-            -w /app \
-            lmagniez03/flutter:latest \
-            bash -c "flutter pub outdated"
+          docker pull flutter/flutter:stable
+          docker run --rm -v ${{ github.workspace }}:/app -w /app flutter/flutter:stable flutter clean
 
       - name: Get Pub Dependencies
         run: |
-          docker run --rm --user root \
-            -v ${{ github.workspace }}:/app \
-            -w /app \
-            lmagniez03/flutter:latest \
-            bash -c "flutter pub get"
-
-      - name: Debug Environment
-        run: |
-          docker run --rm --user root \
-            -v ${{ github.workspace }}:/app \
-            -w /app \
-            lmagniez03/flutter:latest \
-            bash -c "env"
+          docker run --rm -v ${{ github.workspace }}:/app -w /app flutter/flutter:stable flutter pub get
 
       - name: Build Flutter Web
         run: |
-          docker run --rm --user root \
-            -v ${{ github.workspace }}:/app \
-            -w /app \
-            lmagniez03/flutter:latest \
-            bash -c "flutter build web --release --verbose"
+          docker run --rm -v ${{ github.workspace }}:/app -w /app flutter/flutter:stable flutter build web --release --verbose
 
-      - name: Deploy to Firebase Hosting
+      - name: Use Firebase CLI Docker Image
         run: |
-          docker run --rm --user root \
-            -v ${{ github.workspace }}:/app \
-            -w /app \
-            -e FIREBASE_TOKEN=${{ secrets.FIREBASE_TOKEN }} \
-            lmagniez03/flutter:latest \
-            bash -c "flutter pub get && flutter build web --release && firebase deploy --only hosting --project memories-7bdc6"
-
-      - name: Check Firebase Deployment Logs
-        run: |
-          docker run --rm --user root \
-            -v ${{ github.workspace }}:/app \
-            -w /app \
-            -e FIREBASE_TOKEN=${{ secrets.FIREBASE_TOKEN }} \
-            lmagniez03/flutter:latest \
-            bash -c "firebase deploy --only hosting --project memories-7bdc6 --debug"
+          docker pull firebase/cli
+          docker run --rm -v ${{ github.workspace }}:/app -w /app -e FIREBASE_TOKEN=${{ secrets.FIREBASE_TOKEN }} firebase/cli firebase deploy --only hosting --project memories-7bdc6
 
       - name: Set up Environment Variables
         run: |
