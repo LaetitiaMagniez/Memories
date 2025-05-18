@@ -18,14 +18,14 @@ jobs:
 
       - name: Pull and Use Docker Hub Image
         run: |
-          docker pull lmagniez03/flutter-firebase:latest
+          docker pull lmagniez03/flutter-firebase-new:latest
 
       - name: Configure Safe Directory
         run: |
           docker run --rm --user root \
             -v ${{ github.workspace }}:/app \
             -w /app \
-            lmagniez03/flutter-firebase:latest \
+           lmagniez03/flutter-firebase-new:latest \
             git config --global --add safe.directory /opt/flutter
 
       - name: Change Permissions for Flutter Directory
@@ -33,7 +33,7 @@ jobs:
           docker run --rm --user root \
             -v ${{ github.workspace }}:/app \
             -w /app \
-            lmagniez03/flutter-firebase:latest \
+            lmagniez03/flutter-firebase-new:latest \
             bash -c "chown -R 1001:1001 /opt/flutter"
 
       - name: Clean Flutter Cache
@@ -41,7 +41,7 @@ jobs:
           docker run --rm --user root \
             -v ${{ github.workspace }}:/app \
             -w /app \
-            lmagniez03/flutter-firebase:latest \
+            lmagniez03/flutter-firebase-new:latest \
             bash -c "flutter clean"
 
       - name: Verify Flutter Directory Permissions
@@ -49,7 +49,7 @@ jobs:
           docker run --rm --user root \
             -v ${{ github.workspace }}:/app \
             -w /app \
-            lmagniez03/flutter-firebase:latest \
+            lmagniez03/flutter-firebase-new:latest \
             bash -c "ls -l /opt/flutter"
 
       - name: Check Flutter and Dart Versions
@@ -57,7 +57,7 @@ jobs:
           docker run --rm --user root \
             -v ${{ github.workspace }}:/app \
             -w /app \
-            lmagniez03/flutter-firebase:latest \
+            lmagniez03/flutter-firebase-new:latest \
             bash -c "flutter --version && dart --version"
 
       - name: Remove sky_engine Dependency
@@ -65,7 +65,7 @@ jobs:
           docker run --rm --user root \
             -v ${{ github.workspace }}:/app \
             -w /app \
-            lmagniez03/flutter-firebase:latest \
+            lmagniez03/flutter-firebase-new:latest \
             bash -c "sed -i '/sky_engine/d' pubspec.yaml"
 
       - name: Debug Pub Dependencies
@@ -73,7 +73,7 @@ jobs:
           docker run --rm --user root \
             -v ${{ github.workspace }}:/app \
             -w /app \
-            lmagniez03/flutter-firebase:latest \
+            lmagniez03/flutter-firebase-new:latest \
             bash -c "flutter pub outdated"
 
       - name: Get Pub Dependencies
@@ -81,7 +81,7 @@ jobs:
           docker run --rm --user root \
             -v ${{ github.workspace }}:/app \
             -w /app \
-            lmagniez03/flutter-firebase:latest \
+            lmagniez03/flutter-firebase-new:latest \
             bash -c "flutter pub get"
 
       - name: Debug Environment
@@ -89,7 +89,7 @@ jobs:
           docker run --rm --user root \
             -v ${{ github.workspace }}:/app \
             -w /app \
-            lmagniez03/flutter-firebase:latest \
+            lmagniez03/flutter-firebase-new:latest \
             bash -c "env"
 
       - name: Build Flutter Web
@@ -97,7 +97,7 @@ jobs:
           docker run --rm --user root \
             -v ${{ github.workspace }}:/app \
             -w /app \
-            lmagniez03/flutter-firebase:latest \
+            lmagniez03/flutter-firebase-new:latest \
             bash -c "flutter build web --release --verbose"
 
       - name: Deploy to Firebase Hosting
@@ -106,7 +106,7 @@ jobs:
             -v ${{ github.workspace }}:/app \
             -w /app \
             -e FIREBASE_TOKEN=${{ secrets.FIREBASE_TOKEN }} \
-            lmagniez03/flutter-firebase:latest \
+            lmagniez03/flutter-firebase-new:latest \
             bash -c "flutter pub get && flutter build web --release && firebase deploy --only hosting --project memories-7bdc6"
 
       - name: Check Firebase Deployment Logs
@@ -115,7 +115,7 @@ jobs:
             -v ${{ github.workspace }}:/app \
             -w /app \
             -e FIREBASE_TOKEN=${{ secrets.FIREBASE_TOKEN }} \
-            lmagniez03/flutter-firebase:latest \
+            lmagniez03/flutter-firebase-new:latest \
             bash -c "firebase deploy --only hosting --project memories-7bdc6 --debug"
 
       - name: Set up Environment Variables
