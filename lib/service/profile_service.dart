@@ -122,7 +122,7 @@ class ProfileService {
 
             final fileName = '${user.uid}_${DateTime.now().millisecondsSinceEpoch}.jpg';
             final storageRef = FirebaseStorage.instance.ref().child('user_images/$fileName');
-            final uploadTask = storageRef.putData(await selectedImage!.readAsBytes());
+            final uploadTask = storageRef.putData(await selectedImage.readAsBytes());
             final taskSnapshot = await uploadTask;
             imageUrl = await taskSnapshot.ref.getDownloadURL();
 

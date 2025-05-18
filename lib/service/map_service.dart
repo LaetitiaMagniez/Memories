@@ -5,7 +5,7 @@ import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:memories_project/class/souvenir.dart';
 import 'package:memories_project/souvenir_view/full_screen_image_view.dart';
-import 'package:memories_project/souvenir_view/video_thumbnail.dart';
+import 'package:memories_project/souvenir_view/video_thumbnail_widget.dart';
 import 'package:memories_project/souvenir_view/video_viewer.dart';
 
 
@@ -30,7 +30,7 @@ class MapService {
   // Créer des marqueurs à partir des souvenirs
   static Future<Set<Marker>> createMarkersFromSouvenirs(List<Souvenir> souvenirs, BuildContext context) async {
     Set<Marker> markers = {};
-    final String apiKey = dotenv.env['ninja_API_KEY'] ?? '';
+    final String apiKey = dotenv.env['NINJA_API_KEY'] ?? '';
 
     // Grouper les souvenirs par ville
     Map<String, List<Souvenir>> souvenirsByCity = groupSouvenirsByCity(souvenirs);
@@ -121,7 +121,7 @@ class MapService {
                                     child: souvenirs[index].type == 'video'
                                       ? AspectRatio(
                                           aspectRatio: 4 / 3,
-                                          child: VideoThumbnail(souvenirs[index].url),
+                                          child: VideoThumbnailWidget(souvenirs[index].url),
                                         )
                                       : Image.network(
                                           souvenirs[index].url,

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:memories_project/class/souvenir.dart';
 import 'package:memories_project/service/souvenir_service.dart';
 import 'package:memories_project/souvenir_view/full_screen_image_view.dart';
-import 'package:memories_project/souvenir_view/video_thumbnail.dart';
+import 'package:memories_project/souvenir_view/video_thumbnail_widget.dart';
 import 'package:memories_project/souvenir_view/video_viewer.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
@@ -150,7 +150,7 @@ class _CalendarPageState extends State<CalendarPage> {
                               child: SizedBox(
                                 width: 50,
                                 height: 50,
-                                child: VideoThumbnail(value[index].url),
+                                child: VideoThumbnailWidget(value[index].url),
                               ),
                             ),
                       ),
@@ -201,7 +201,7 @@ class _CalendarPageState extends State<CalendarPage> {
                         aspectRatio: 16 / 9, // Ratio d'aspect pour les vidéos
                         child: SizedBox(
                           height: 250, // Hauteur plus grande pour les vidéos
-                          child: VideoThumbnail(souvenir.url),
+                          child: VideoThumbnailWidget(souvenir.url),
                         ),
                       ),
                 ),

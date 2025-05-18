@@ -12,22 +12,9 @@ import 'package:intl/intl.dart';
 class SouvenirService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  bool isManaging = false;
-  List<Souvenir> selectedSouvenirs = [];
-
-  void toggleManagementMode(Souvenir souvenir, VoidCallback refreshUI) {
-    if (selectedSouvenirs.contains(souvenir)) {
-      selectedSouvenirs.remove(souvenir);
-    } else {
-      selectedSouvenirs.add(souvenir);
-    }
-    refreshUI();
-  }
-
-  void clearSelection(VoidCallback refreshUI) {
-    selectedSouvenirs.clear();
-    refreshUI();
-  }
+  /// Ancienne gestion supprimée :
+  // bool isManaging = false;
+  // List<Souvenir> selectedSouvenirs = [];
 
   Future<void> pickAndUploadMedia(
       BuildContext context, String albumId, String type) async {
@@ -74,8 +61,8 @@ class SouvenirService {
     }
   }
 
-  Future<void> uploadMedia(String albumId, Uint8List fileData, String fileName,
-      String type) async {
+  Future<void> uploadMedia(
+      String albumId, Uint8List fileData, String fileName, String type) async {
     User? currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser == null) {
       throw Exception("Aucun utilisateur connecté");
@@ -130,8 +117,7 @@ class SouvenirService {
         .get();
 
     if (mediaDoc.exists) {
-      Map<String, dynamic> mediaData =
-      mediaDoc.data() as Map<String, dynamic>;
+      Map<String, dynamic> mediaData = mediaDoc.data() as Map<String, dynamic>;
       String mediaUrl = mediaData['url'];
 
       try {
@@ -150,7 +136,13 @@ class SouvenirService {
     }
   }
 
-  void confirmDeleteSelectedSouvenirs(BuildContext context, String albumId, VoidCallback refreshUI) async {
+  /// ✅ Nouvelle version : suppression des souvenirs sélectionnés
+  void confirmDeleteSelectedSouvenirs(
+      BuildContext context,
+      String albumId,
+      VoidCallback refreshUI,
+      List<Souvenir> selectedSouvenirs,
+      ) {
     if (selectedSouvenirs.isEmpty) return;
 
     showDialog(
@@ -158,14 +150,19 @@ class SouvenirService {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text("Confirmer la suppression"),
-          content: Text("Êtes-vous sûr de vouloir supprimer ${selectedSouvenirs.length > 1 ? 'ces albums' : 'cet album'} ?"),
+          content: Text(
+            "Êtes-vous sûr de vouloir supprimer ${selectedSouvenirs.length > 1 ? 'ces souvenirs' : 'ce souvenir'} ?",
+          ),
           actions: [
             TextButton(
               child: const Text("Annuler"),
               onPressed: () => Navigator.pop(context),
             ),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+              ),
               child: const Text("Supprimer"),
               onPressed: () async {
                 for (var souvenir in selectedSouvenirs) {
@@ -173,8 +170,6 @@ class SouvenirService {
                 }
 
                 Navigator.pop(context);
-                isManaging = false;
-                selectedSouvenirs.clear();
                 refreshUI(); // Mise à jour de l'interface
               },
             ),
@@ -245,10 +240,6 @@ class SouvenirService {
         .toList();
   }
 
-
-
-
-
   void showSouvenirOptions(
       BuildContext context, String albumId, VoidCallback onManageSouvenir) {
     showModalBottomSheet(
@@ -297,8 +288,7 @@ class SouvenirService {
                     },
                   ),
                   ListTile(
-                    leading:
-                    const Icon(Icons.video_library, color: Colors.deepPurple),
+                    leading: const Icon(Icons.video_library, color: Colors.deepPurple),
                     title: const Text('Ajouter une vidéo'),
                     onTap: () {
                       Navigator.pop(context);
