@@ -16,17 +16,14 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
 
-      - name: Authenticate to GitHub Container Registry
-        run: echo "${{ secrets.CR_PAT }}" | docker login ghcr.io -u lmagniez03 --password-stdin
-
-      - name: Pull and Use Prebuilt Docker Image
+      - name: Pull and Use Docker Hub Image
         run: |
-          docker pull ghcr.io/lmagniez03/flutter-firebase:latest
+          docker pull lmagniez03/flutter-firebase:latest
           docker run --rm \
             -v ${{ github.workspace }}:/app \
             -w /app \
             -e FIREBASE_TOKEN=${{ secrets.FIREBASE_TOKEN }} \
-            ghcr.io/lmagniez03/flutter-firebase:latest \
+            lmagniez03/flutter-firebase:latest \
             bash -c "
               flutter pub get &&
               flutter build web --release &&
