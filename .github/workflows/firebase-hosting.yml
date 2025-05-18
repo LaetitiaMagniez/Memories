@@ -18,21 +18,21 @@ jobs:
 
       - name: Use Flutter Docker Image
         run: |
-          docker pull ghcr.io/cirruslabs/flutter:3.32.0-0.5.pre
-          docker run --rm -v ${{ github.workspace }}:/app -w /app ghcr.io/cirruslabs/flutter:3.32.0-0.5.pre flutter clean
+          docker pull ghcr.io/cirruslabs/flutter:stable
+          docker run --rm -v ${{ github.workspace }}:/app -w /app ghcr.io/cirruslabs/flutter:stable flutter clean
 
       - name: Get Pub Dependencies
         run: |
-          docker run --rm -v ${{ github.workspace }}:/app -w /app ghcr.io/cirruslabs/flutter:3.32.0-0.5.pre flutter pub get
+          docker run --rm -v ${{ github.workspace }}:/app -w /app ghcr.io/cirruslabs/flutter:stable flutter pub get
 
       - name: Build Flutter Web
         run: |
-          docker run --rm -v ${{ github.workspace }}:/app -w /app ghcr.io/cirruslabs/flutter:3.32.0-0.5.pre flutter build web --release --verbose
+          docker run --rm -v ${{ github.workspace }}:/app -w /app ghcr.io/cirruslabs/flutter:stable flutter build web --release --verbose
 
       - name: Use Firebase CLI Docker Image
         run: |
-          docker pull firebase/cli
-          docker run --rm -v ${{ github.workspace }}:/app -w /app -e FIREBASE_TOKEN=${{ secrets.FIREBASE_TOKEN }} firebase/cli firebase deploy --only hosting --project memories-7bdc6
+          docker pull rambabusaravanan/firebase
+          docker run --rm -v ${{ github.workspace }}:/app -w /app -e FIREBASE_TOKEN=${{ secrets.FIREBASE_TOKEN }} rambabusaravanan/firebase firebase deploy --only hosting --project memories-7bdc6
 
       - name: Set up Environment Variables
         run: |
