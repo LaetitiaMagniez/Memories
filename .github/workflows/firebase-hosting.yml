@@ -18,7 +18,7 @@ jobs:
 
       - name: Use Flutter Docker Image
         run: |
-          docker pull ghcr.io/cirruslabs/flutter:stable
+          docker pull ghcr.io/cirruslabs/flutter:3.29.2
           docker run --rm -v ${{ github.workspace }}:/app -w /app ghcr.io/cirruslabs/flutter:3.29.2 flutter clean
 
       - name: Get Pub Dependencies
