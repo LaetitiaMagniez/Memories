@@ -18,16 +18,16 @@ jobs:
 
       - name: Use Flutter Docker Image
         run: |
-          docker pull flutter/flutter:stable
-          docker run --rm -v ${{ github.workspace }}:/app -w /app flutter/flutter:stable flutter clean
+          docker pull ghcr.io/cirruslabs/flutter:3.32.0-0.5.pre
+          docker run --rm -v ${{ github.workspace }}:/app -w /app ghcr.io/cirruslabs/flutter:3.32.0-0.5.pre flutter clean
 
       - name: Get Pub Dependencies
         run: |
-          docker run --rm -v ${{ github.workspace }}:/app -w /app flutter/flutter:stable flutter pub get
+          docker run --rm -v ${{ github.workspace }}:/app -w /app ghcr.io/cirruslabs/flutter:3.32.0-0.5.pre flutter pub get
 
       - name: Build Flutter Web
         run: |
-          docker run --rm -v ${{ github.workspace }}:/app -w /app flutter/flutter:stable flutter build web --release --verbose
+          docker run --rm -v ${{ github.workspace }}:/app -w /app ghcr.io/cirruslabs/flutter:3.32.0-0.5.pre flutter build web --release --verbose
 
       - name: Use Firebase CLI Docker Image
         run: |
