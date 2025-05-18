@@ -20,6 +20,22 @@ jobs:
         run: |
           docker pull lmagniez03/flutter-firebase:latest
 
+      - name: Configure Safe Directory
+        run: |
+          docker run --rm \
+            -v ${{ github.workspace }}:/app \
+            -w /app \
+            lmagniez03/flutter-firebase:latest \
+            git config --global --add safe.directory /opt/flutter
+
+      - name: Clean Flutter Directory
+        run: |
+          docker run --rm \
+            -v ${{ github.workspace }}:/app \
+            -w /app \
+            lmagniez03/flutter-firebase:latest \
+            bash -c "rm -rf /opt/flutter"
+
       - name: Check Flutter Version
         run: |
           docker run --rm \
