@@ -21,7 +21,7 @@ jobs:
 
       - name: Pull and Use Prebuilt Docker Image
         run: |
-          docker pull ghcr.io/lmagniez03/flutter-firebase:latest
+          docker pull lmagniez03/flutter-firebase:latest
           docker run --rm \
             -v ${{ github.workspace }}:/app \
             -w /app \
