@@ -46,5 +46,3 @@ jobs:
         run: firebase deploy --only hosting --project memories-7bdc6
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
-
-
