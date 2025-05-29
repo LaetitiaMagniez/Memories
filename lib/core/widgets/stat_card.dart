@@ -17,24 +17,23 @@ class StatCard extends StatelessWidget {
     return Expanded(
       child: Card(
         color: color,
-        elevation: 4,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         child: Padding(
-          padding: const EdgeInsets.all(12.0),
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                title,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                '$count',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   color: Colors.white,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 4),
               Text(
-                '$count',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: Colors.white,
-                ),
+                title,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white),
               ),
             ],
           ),

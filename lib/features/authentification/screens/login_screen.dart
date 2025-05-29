@@ -5,6 +5,8 @@ import 'package:memories_project/features/authentification/password/forgotten_pa
 import '../../../app/home.dart';
 import '../../../core/services/authentification_service.dart';
 
+// Aucune import à modifier
+
 class Login extends StatefulWidget {
   const Login({super.key});
 
@@ -24,13 +26,12 @@ class _LoginState extends State<Login> {
   bool _rememberMe = false;
   bool _hidePasswordField = false;
   bool _isBiometricAvailable = false;
-  bool _isBiometricLoading = false;
+  bool _hasAttemptedBiometric = false;
 
   @override
   void initState() {
     super.initState();
     _loadSavedCredentials();
-    attemptAutoLogin();
     _checkBiometricAvailability();
   }
 
@@ -39,26 +40,15 @@ class _LoginState extends State<Login> {
       setState(() => _isBiometricAvailable = false);
       return;
     }
-    // Ici on demande la disponibilité réelle de la biométrie
+
     final canAuthenticate = await authentificationService.canCheckBiometrics();
     setState(() {
       _isBiometricAvailable = canAuthenticate;
     });
-  }
 
-  void attemptAutoLogin() async {
-    final rememberMe = await authentificationService.loadRememberMeState();
-    if (rememberMe) {
-      if (kIsWeb) return; // Pas de biométrie sur web
-
-      final didAuthenticate = await authentificationService.authenticateWithBiometrics();
-      if (didAuthenticate) {
-        final success = await authentificationService.biometricLogin();
-        if (success && mounted) {
-          setState(() => _hidePasswordField = true);
-          Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => HomeScreen()));
-        }
-      }
+    if (canAuthenticate && !_hasAttemptedBiometric) {
+      _hasAttemptedBiometric = true;
+      _attemptAutoBiometricLogin();
     }
   }
 
@@ -70,6 +60,21 @@ class _LoginState extends State<Login> {
         _rememberMe = true;
         _emailController.text = savedEmail;
       });
+    }
+  }
+
+  Future<void> _attemptAutoBiometricLogin() async {
+    final rememberMe = await authentificationService.loadRememberMeState();
+    if (!rememberMe) return;
+
+    final didAuthenticate = await authentificationService.authenticateWithBiometrics();
+
+    if (didAuthenticate) {
+      final success = await authentificationService.biometricLogin();
+      if (success && mounted) {
+        setState(() => _hidePasswordField = true);
+        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => HomeScreen()));
+      }
     }
   }
 
@@ -118,42 +123,6 @@ class _LoginState extends State<Login> {
       } finally {
         setState(() => _isLoading = false);
       }
-    }
-  }
-
-  Future<void> _handleBiometricLogin() async {
-    if (kIsWeb) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Authentification biométrique non disponible sur le web.")),
-      );
-      return;
-    }
-
-    setState(() => _isBiometricLoading = true);
-
-    final didAuthenticate = await authentificationService.authenticateWithBiometrics();
-
-    if (!didAuthenticate) {
-      setState(() => _isBiometricLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Authentification biométrique annulée ou non réussie.")),
-      );
-      return;
-    }
-
-    final success = await authentificationService.biometricLogin();
-
-    setState(() => _isBiometricLoading = false);
-
-    if (success && mounted) {
-      setState(() => _hidePasswordField = true);
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => HomeScreen()),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Échec de la connexion biométrique.")),
-      );
     }
   }
 
@@ -237,12 +206,15 @@ class _LoginState extends State<Login> {
                     child: const Text('Se connecter'),
                   ),
                   if (_isBiometricAvailable)
-                    _isBiometricLoading
-                        ? const Center(child: CircularProgressIndicator())
-                        : ElevatedButton.icon(
-                      onPressed: _handleBiometricLogin,
-                      icon: const Icon(Icons.fingerprint),
-                      label: const Text('Connexion biométrique'),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16.0),
+                      child: Center(
+                        child: Text(
+                          'Vous pouvez également vous connecter avec votre empreinte digitale',
+                          style: TextStyle(color: Colors.grey),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
                     ),
                   TextButton(
                     onPressed: () {
@@ -265,7 +237,6 @@ class _LoginState extends State<Login> {
                     child: Text(
                       'Mot de passe oublié ?',
                       style: TextStyle(
-                        // Couleur par défaut du texte dans le thème (pas de bleu forcé)
                         color: theme.textTheme.bodyLarge?.color,
                         decoration: TextDecoration.underline,
                       ),

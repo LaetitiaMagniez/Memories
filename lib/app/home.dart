@@ -5,7 +5,7 @@ import 'package:memories_project/features/calendar/screen/calendar.dart';
 import 'package:memories_project/features/map/screens/map.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../features/user/screens/profile.dart';
+import '../features/user/screens/profile_page.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});

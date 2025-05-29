@@ -3,10 +3,10 @@ name: Deploy to Firebase Hosting
 on:
   push:
     branches:
-      - main
+      - main  # Replace with your default branch
   pull_request:
     branches:
-      - main
+      - main # Replace with your default branch
 
 jobs:
   build_and_deploy:
@@ -16,25 +16,33 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
 
-      - name: Use Flutter Docker Image
-        run: |
-          docker pull fischerscode/flutter-sudo
-          docker run --rm -v ${{ github.workspace }}:/app -w /app fischerscode/flutter-sudo flutter clean
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v3
+        with:
+          flutter-version: '3.29.3'
 
-      - name: Get Pub Dependencies
-        run: |
-          docker run --rm -v ${{ github.workspace }}:/app -w /app fischerscode/flutter-sudo flutter pub get
+      - name: Install Dependencies
+        run: flutter pub get
 
       - name: Build Flutter Web
-        run: |
-          docker run --rm -v ${{ github.workspace }}:/app -w /app fischerscode/flutter-sudo flutter build web --release --verbose
+        run: flutter build web --release
 
-      - name: Use Firebase CLI Docker Image
-        run: |
-          docker pull rambabusaravanan/firebase
-          docker run --rm -v ${{ github.workspace }}:/app -w /app -e FIREBASE_TOKEN=${{ secrets.FIREBASE_TOKEN }} rambabusaravanan/firebase firebase deploy --only hosting --project memories-7bdc6
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '21.1.0'
+
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
 
       - name: Set up Environment Variables
         run: |
           echo "GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }}" >> $GITHUB_ENV
           echo "NINJA_API_KEY=${{ secrets.NINJA_API_KEY }}" >> $GITHUB_ENV
+
+      - name: Deploy to Firebase Hosting
+        run: firebase deploy --only hosting --project memories-7bdc6
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+
+

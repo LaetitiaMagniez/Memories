@@ -4,9 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:local_auth/local_auth.dart';
-
 import '../../features/user/logic/contact_service.dart';
-import '../../features/user/screens/profile.dart';
+import '../../features/user/screens/profile_page.dart';
 import '../widgets/loading_screen.dart';
 
 class AuthentificationService {
@@ -77,11 +76,23 @@ class AuthentificationService {
     return false;
   }
 
+  Future<void> clearSavedCredentials() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('rememberMe');
+    await prefs.remove('email');
+    await _secureStorage.delete(key: 'password');
+  }
+
+
   Future<bool> biometricLogin() async {
     final email = await loadEmail();
     final password = await loadSecurePassword();
 
-    if (email.isEmpty || password.isEmpty) return false;
+    if (email.isEmpty || password.isEmpty) {
+      debugPrint("Identifiants biométriques manquants");
+      return false;
+    }
+
 
     try {
       await _auth.signInWithEmailAndPassword(email: email, password: password);
