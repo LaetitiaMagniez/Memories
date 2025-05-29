@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:memories_project/core/services/authentification_service.dart';
@@ -23,6 +24,16 @@ class _AuthGateState extends State<AuthGate> {
 
   Future<void> _handleRedirect() async {
     final user = _auth.currentUser;
+
+    if (kIsWeb) {
+      if (user != null) {
+        _goTo(const HomeScreen());
+      } else {
+        _goTo(const AuthTabs());
+      }
+      return;
+    }
+
     if (user != null) {
       _goTo(const HomeScreen());
     } else {
@@ -37,7 +48,7 @@ class _AuthGateState extends State<AuthGate> {
           }
         }
       }
-      _goTo(const AuthTabs()); // -> vers ton interface onglets login/signup
+      _goTo(const AuthTabs());
     }
   }
 
