@@ -60,7 +60,7 @@ android/app/.cxx/
 key.properties
 **/*.keystore
 **/*.jks
-.env
+.env.android
 local.properties
 
 

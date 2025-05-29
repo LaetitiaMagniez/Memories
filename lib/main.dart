@@ -6,11 +6,21 @@ import 'package:provider/provider.dart';
 import 'core/widgets/auth_gate.dart';
 import 'firebase_options.dart';
 import 'core/providers/theme_provider.dart';
+import 'dart:io';
 
 void main() {
   runZonedGuarded(() async {
     WidgetsFlutterBinding.ensureInitialized();
-    await dotenv.load(fileName: ".env");
+
+    try {
+      // Charger le fichier .env.android
+      await dotenv.load(fileName: '.env.android');
+    } catch (e, stackTrace) {
+      print('Erreur lors du chargement du fichier .env.android : $e');
+      print('Trace d\'appel : $stackTrace');
+      // Vous pouvez également afficher un message d'erreur à l'utilisateur ici
+      return;
+    }
 
     try {
       await Firebase.initializeApp(
@@ -18,6 +28,8 @@ void main() {
       );
     } catch (e) {
       print('Erreur d\'initialisation Firebase : $e');
+      // Vous pouvez également afficher un message d'erreur à l'utilisateur ici
+      return;
     }
 
     runApp(
@@ -28,8 +40,10 @@ void main() {
     );
   }, (error, stackTrace) {
     print('Erreur non gérée : $error');
+    print('Trace d\'appel : $stackTrace');
   });
 }
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -43,7 +57,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData.light(),
       darkTheme: ThemeData.dark(),
       themeMode: themeProvider.themeMode,
-      home: const AuthGate(), // <- AuthGate gère la redirection vers login/signup ou Home
+      home: const AuthGate(),
       debugShowCheckedModeBanner: false,
     );
   }
