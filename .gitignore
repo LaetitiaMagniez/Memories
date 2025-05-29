@@ -71,7 +71,6 @@ local.properties
 # Firebase specific
 **/google-services.json
 **/GoogleService-Info.plist
-lib/firebase_options.dart
 memories.json
 .firebaserc
 .firebase/
