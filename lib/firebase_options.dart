@@ -46,7 +46,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '226377233333',
     projectId: 'memories-7bdc6',
     authDomain: 'memories-7bdc6.firebaseapp.com',
-    storageBucket: 'memories-7bdc6.firebasestorage.app',
+    storageBucket: 'memories-7bdc6.appspot.com',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
@@ -54,7 +54,7 @@ class DefaultFirebaseOptions {
     appId: '1:226377233333:android:e2e58902906ecb63cc9ffc',
     messagingSenderId: '226377233333',
     projectId: 'memories-7bdc6',
-    storageBucket: 'memories-7bdc6.firebasestorage.app',
+    storageBucket: 'memories-7bdc6.appspot.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
@@ -62,7 +62,7 @@ class DefaultFirebaseOptions {
     appId: '1:226377233333:ios:948614c366f95681cc9ffc',
     messagingSenderId: '226377233333',
     projectId: 'memories-7bdc6',
-    storageBucket: 'memories-7bdc6.firebasestorage.app',
+    storageBucket: 'memories-7bdc6.appspot.com',
     iosBundleId: 'com.example.memoriesProject',
   );
 
@@ -71,7 +71,7 @@ class DefaultFirebaseOptions {
     appId: '1:226377233333:ios:948614c366f95681cc9ffc',
     messagingSenderId: '226377233333',
     projectId: 'memories-7bdc6',
-    storageBucket: 'memories-7bdc6.firebasestorage.app',
+    storageBucket: 'memories-7bdc6.appspot.com',
     iosBundleId: 'com.example.memoriesProject',
   );
 
@@ -81,6 +81,6 @@ class DefaultFirebaseOptions {
     messagingSenderId: '226377233333',
     projectId: 'memories-7bdc6',
     authDomain: 'memories-7bdc6.firebaseapp.com',
-    storageBucket: 'memories-7bdc6.firebasestorage.app',
+    storageBucket: 'memories-7bdc6.appspot.com',
   );
 }
