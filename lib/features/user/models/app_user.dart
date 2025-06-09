@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AppUser {
   final String uid;
-  final String displayName;
+  final String username;
   final String email;
   final String photoURL;
   final String role;
@@ -10,7 +10,7 @@ class AppUser {
 
   AppUser({
     required this.uid,
-    required this.displayName,
+    required this.username,
     required this.email,
     required this.photoURL,
     required this.role,
@@ -20,7 +20,7 @@ class AppUser {
   factory AppUser.fromDocument(DocumentSnapshot doc) {
     return AppUser(
       uid: doc.id,
-      displayName: doc['displayName'],
+      username: doc['displayName'],
       email: doc['email'],
       photoURL: doc['photoURL'],
       role: doc['role'],
@@ -30,7 +30,7 @@ class AppUser {
 
   Map<String, dynamic> toMap() {
     return {
-      'displayName': displayName,
+      'username': username,
       'email': email,
       'photoURL': photoURL,
       'role': role,

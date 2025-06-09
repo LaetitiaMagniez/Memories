@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:memories_project/features/memories/models/memory.dart';
-import 'package:memories_project/features/memories/logic/memories_service.dart';
-import 'package:memories_project/features/memories/widget/full_screen_image_view.dart';
-import 'package:memories_project/features/memories/widget/video_thumbnail_widget.dart';
-import 'package:memories_project/features/memories/widget/video_viewer.dart';
+import 'package:memories_project/features/memories/services/memories_crud_service.dart';
+import 'package:memories_project/features/memories/widget/memory/full_screen_image_view.dart';
+import 'package:memories_project/features/memories/widget/video/video_thumbnail_widget.dart';
+import 'package:memories_project/features/memories/widget/video/video_viewer.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -35,8 +35,8 @@ class _CalendarPageState extends State<CalendarPage> {
   }
 
   void _loadMemories() {
-    final MemoriesService memoriesService = MemoriesService();
-    memoriesService.getAllMemoriesForUser().listen((newMemories) {
+    final MemoriesCrudService memoriesCrudService = MemoriesCrudService();
+    memoriesCrudService.getAllMemoriesForUser().listen((newMemories) {
       setState(() {
         memories = _groupMemoriesByDate(newMemories);
         _selectedEvents.value = _getEventsForDay(_selectedDay!);

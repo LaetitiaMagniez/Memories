@@ -1,20 +1,20 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/material.dart';
-import 'package:memories_project/features/memories/logic/memories_service.dart';
 import 'package:memories_project/features/memories/models/memory.dart';
 
+import '../../memories/services/memories_crud_service.dart';
 import '../logic/map_service.dart';
 
 class MapPage extends StatelessWidget {
   MapPage({super.key});
-  final MemoriesService memoriesService = MemoriesService();
+  final MemoriesCrudService memoriesCrudService = MemoriesCrudService();
 
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: StreamBuilder<List<Memory>>(
-        stream: memoriesService.getAllMemoriesForUser(),
+        stream: memoriesCrudService.getAllMemoriesForUser(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());

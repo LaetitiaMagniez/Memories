@@ -3,9 +3,9 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:memories_project/features/memories/widget/full_screen_image_view.dart';
-import 'package:memories_project/features/memories/widget/video_thumbnail_widget.dart';
-import 'package:memories_project/features/memories/widget/video_viewer.dart';
+import 'package:memories_project/features/memories/widget/memory/full_screen_image_view.dart';
+import 'package:memories_project/features/memories/widget/video/video_thumbnail_widget.dart';
+import 'package:memories_project/features/memories/widget/video/video_viewer.dart';
 
 import '../../memories/models/memory.dart';
 
