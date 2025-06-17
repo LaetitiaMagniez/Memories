@@ -1,56 +1,58 @@
-import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:memories_project/features/album/models/album.dart';
+import 'package:mockito/mockito.dart';
+import 'package:mockito/annotations.dart';
 
-class FakeDocumentReference extends Fake implements DocumentReference<Map<String, dynamic>> {}
-class FakeCollectionReference extends Fake implements CollectionReference<Map<String, dynamic>> {}
-class FakeQuerySnapshot extends Fake implements QuerySnapshot<Map<String, dynamic>> {}
-class FakeQueryDocumentSnapshot extends Fake implements QueryDocumentSnapshot<Map<String, dynamic>> {}
-class FakeAggregateQuerySnapshot extends Fake implements AggregateQuerySnapshot {}
+// Génère le mock de DocumentSnapshot
+@GenerateMocks([DocumentSnapshot])
+import 'album_test.mocks.dart';
 
 void main() {
-  setUpAll(() {
-    registerFallbackValue(FakeDocumentReference());
-    registerFallbackValue(FakeCollectionReference());
-  });
+  group('Album', () {
+    test('Album.empty() should create an empty Album with the given id', () {
+      final album = Album.empty('test_id');
 
-  test('Album.fromSnapshotWithDetails parses Firestore document correctly', () async {
-    final doc = Mock() as DocumentSnapshot<Map<String, dynamic>>;
-    final ref = Mock() as DocumentReference<Map<String, dynamic>>;
-    final mediaRef = Mock() as CollectionReference<Map<String, dynamic>>;
-    final query = Mock() as Query<Map<String, dynamic>>;
-    final querySnapshot = Mock() as QuerySnapshot<Map<String, dynamic>>;
-    final mediaDoc = Mock() as QueryDocumentSnapshot<Map<String, dynamic>>;
-    final aggregateQuery = Mock() as AggregateQuery;
-    final aggregateSnapshot = Mock() as AggregateQuerySnapshot;
+      expect(album.id, 'test_id');
+      expect(album.userId, '');
+      expect(album.name, '');
+      expect(album.thumbnailUrl, '');
+      expect(album.thumbnailType, '');
+      expect(album.itemCount, 0);
+    });
 
-    // Stub values
-    when(() => doc.id).thenReturn('album-id');
-    when(() => doc.data()).thenReturn({'userId': 'user-123', 'name': 'Vacances'});
-    when(() => doc.reference).thenReturn(ref);
+    test('Album.fromFirestore() should create Album from Firestore document', () {
+      final mockDoc = MockDocumentSnapshot();
 
-    when(() => ref.collection('media')).thenReturn(mediaRef);
-    when(() => mediaRef.orderBy('timestamp', descending: true)).thenReturn(query);
-    when(() => query.limit(1)).thenReturn(query);
-    when(() => query.get()).thenAnswer((_) async => querySnapshot);
+      when(mockDoc.id).thenReturn('doc_id');
+      when(mockDoc.data()).thenReturn({
+        'userId': 'user_123',
+        'name': 'My Album',
+      });
 
-    when(() => querySnapshot.docs).thenReturn([mediaDoc]);
-    when(() => mediaDoc['url']).thenReturn('https://example.com/thumb.jpg');
-    when(() => mediaDoc['type']).thenReturn('image');
+      final album = Album.fromFirestore(mockDoc);
 
-    when(() => mediaRef.count()).thenReturn(aggregateQuery);
-    when(() => aggregateQuery.get()).thenAnswer((_) async => aggregateSnapshot);
-    when(() => aggregateSnapshot.count).thenReturn(5);
+      expect(album.id, 'doc_id');
+      expect(album.userId, 'user_123');
+      expect(album.name, 'My Album');
+      expect(album.thumbnailUrl, '');
+      expect(album.thumbnailType, '');
+      expect(album.itemCount, 0);
+    });
 
-    // Appel
-    final album = await Album.fromSnapshotWithDetails(doc);
+    test('Albums with the same id should be equal', () {
+      final album1 = Album.empty('same_id');
+      final album2 = Album.empty('same_id');
 
-    expect(album.id, 'album-id');
-    expect(album.userId, 'user-123');
-    expect(album.name, 'Vacances');
-    expect(album.thumbnailUrl, 'https://example.com/thumb.jpg');
-    expect(album.thumbnailType, 'image');
-    expect(album.itemCount, 5);
+      expect(album1, equals(album2));
+      expect(album1.hashCode, equals(album2.hashCode));
+    });
+
+    test('Albums with different ids should not be equal', () {
+      final album1 = Album.empty('id_1');
+      final album2 = Album.empty('id_2');
+
+      expect(album1, isNot(equals(album2)));
+    });
   });
 }

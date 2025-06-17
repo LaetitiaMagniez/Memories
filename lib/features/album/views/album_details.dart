@@ -1,31 +1,35 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
-import '../../../core/services/firestore_service.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memories_project/features/memories/services/memories_crud_service.dart';
+import 'package:memories_project/features/memories/services/memories_dialogs.dart';
+import '../../../core/providers/app_provider.dart';
 import '../../../core/widgets/loading/upload_progress_bubble.dart';
-import '../logic/memories/memories_service.dart';
-import '../models/memory.dart';
+import '../../memories/models/memory.dart';
+import '../../memories/services/memories_options_menu.dart';
+import '../../memories/widget/memory/full_screen_image_view.dart';
+import '../../memories/widget/video/video_viewer.dart';
+import '../services/album_repository.dart';
 import '../widget/album/album_detail_body.dart';
-import '../widget/full_screen_image_view.dart';
-import '../widget/video/video_viewer.dart';
 
-class AlbumDetailPage extends StatefulWidget {
+class AlbumDetailsPage extends ConsumerStatefulWidget {
   final String albumId;
   final String albumName;
 
-  const AlbumDetailPage({
+  const AlbumDetailsPage({
     super.key,
     required this.albumId,
     required this.albumName,
   });
 
   @override
-  _AlbumDetailPageState createState() => _AlbumDetailPageState();
+  _AlbumDetailsPageState createState() => _AlbumDetailsPageState();
 }
 
-class _AlbumDetailPageState extends State<AlbumDetailPage> {
-  final firestoreService = FirestoreService();
-  final memoriesService = MemoriesService();
+class _AlbumDetailsPageState extends ConsumerState<AlbumDetailsPage> {
+  final albumRepository = AlbumRepository();
+  final memoriesDialogs = MemoriesDialogs();
+  final memoriesOptionsMenu = MemoriesOptionsMenu();
 
   bool isManaging = false;
   double uploadProgress = 0.0;
@@ -34,37 +38,24 @@ class _AlbumDetailPageState extends State<AlbumDetailPage> {
   String? lastUploadedUrl;
 
   List<Memory> currentMemories = [];
-  late final Stream<List<Memory>> memoriesStream;
   late final StreamSubscription<List<Memory>> _memoriesSubscription;
+
+  late MemoriesCrudService memoriesCrudService;
 
   @override
   void initState() {
     super.initState();
-    memoriesStream = firestoreService.getMemoriesForMyAlbums(widget.albumId);
-    _memoriesSubscription = memoriesStream.listen((memories) {
+    memoriesCrudService = MemoriesCrudService(
+      memoriesSelectionNotifier: ref.read(selectedMemoriesProvider.notifier),
+    );
+
+    _memoriesSubscription = albumRepository.getMemoriesForMyAlbums(widget.albumId).listen((memories) {
       setState(() {
         currentMemories = memories;
       });
-
-      // On vérifie si la dernière mémoire uploadée est visible
-      if (waitingForUploadDisplay && lastUploadedUrl != null) {
-        final isDisplayed = memories.any((m) => m.url == lastUploadedUrl);
-        if (isDisplayed) {
-          // On attend 500 ms puis on reset
-          Future.delayed(const Duration(milliseconds: 500), () {
-            if (mounted) {
-              setState(() {
-                isUploading = false;
-                uploadProgress = 0.0;
-                waitingForUploadDisplay = false;
-                lastUploadedUrl = null;
-              });
-            }
-          });
-        }
-      }
     });
   }
+
 
   @override
   void dispose() {
@@ -72,14 +63,29 @@ class _AlbumDetailPageState extends State<AlbumDetailPage> {
     super.dispose();
   }
 
+
   void _toggleMemorySelection(Memory memory) {
-    memoriesService.toggleMemorySelection(memory);
+    ref.read(selectedMemoriesProvider.notifier).toggleSelection(memory);
     setState(() {});
   }
 
   Future<void> moveSelectedMemories() async {
-    await memoriesService.moveSelectedMemories(context, widget.albumId);
-    setState(() {});
+    final selectionNotifier = ref.read(selectedMemoriesProvider.notifier);
+    await memoriesDialogs.moveSelectedMemories(
+      context,
+      widget.albumId,
+      selectionNotifier,
+      memoriesCrudService.deleteMemory,
+          () {
+        setState(() {
+          isManaging = false;
+        });
+      },
+    );
+    selectionNotifier.clear();
+    setState(() {
+      isManaging = false;
+    });
   }
 
   void _onMemoryTap(Memory memory) {
@@ -106,42 +112,43 @@ class _AlbumDetailPageState extends State<AlbumDetailPage> {
     });
   }
 
+  void _exitManaging() {
+    setState(() {
+      isManaging = false;
+    });
+    ref.read(selectedMemoriesProvider.notifier).clear();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final selectedMemories = ref.watch(selectedMemoriesProvider);
+
     return Scaffold(
       appBar: isManaging
           ? AppBar(
         title: const Text("Gérer les souvenirs"),
         actions: [
-          if (memoriesService.selectedMemories.isNotEmpty)
+          if (selectedMemories.isNotEmpty)
             IconButton(
               icon: const Icon(Icons.move_to_inbox),
               onPressed: moveSelectedMemories,
             ),
-          if (memoriesService.selectedMemories.isNotEmpty)
+          if (selectedMemories.isNotEmpty)
             IconButton(
               icon: const Icon(Icons.delete),
               onPressed: () async {
-                memoriesService.confirmDeleteSelectedMemories(
+                await memoriesDialogs.confirmDeleteSelectedMemories(
                   context,
                   widget.albumId,
-                      () {
-                    setState(() {
-                      memoriesService.selectedMemories.clear();
-                      isManaging = false;
-                    });
-                  },
+                  ref.read(selectedMemoriesProvider.notifier),
+                  memoriesCrudService.deleteMemory,
+                  _exitManaging,
                 );
               },
             ),
           IconButton(
             icon: const Icon(Icons.close),
-            onPressed: () {
-              setState(() {
-                isManaging = false;
-                memoriesService.selectedMemories.clear();
-              });
-            },
+            onPressed: _exitManaging,
           ),
         ],
       )
@@ -159,7 +166,9 @@ class _AlbumDetailPageState extends State<AlbumDetailPage> {
             AlbumDetailBody(
               memories: currentMemories,
               isManaging: isManaging,
-              memoriesService: memoriesService,
+              // Plus besoin de passer un service, on peut passer la sélection et toggle
+              selectionNotifier: ref.read(selectedMemoriesProvider.notifier),
+              selectedMemories: selectedMemories,
               onMemoryTap: _onMemoryTap,
             ),
           if (isUploading)
@@ -174,7 +183,7 @@ class _AlbumDetailPageState extends State<AlbumDetailPage> {
       floatingActionButton: isManaging
           ? null
           : FloatingActionButton(
-        onPressed: () => memoriesService.showMemoriesOptions(
+        onPressed: () => memoriesOptionsMenu.showMemoriesOptions(
           context,
           widget.albumId,
           onManageMemory,

@@ -8,8 +8,8 @@ void main() {
   late MockContactService mockContactService;
   late FriendsNotifier friendsNotifier;
 
-  final testUser1 = AppUser(uid: '1', username: 'Alice', email: 'a@mail.com', photoURL: 'dd.com', role: 'Lecteur', friends: ['toto','Bob']);
-  final testUser2 = AppUser(uid: '2', username: 'Bob', email: 'bob@mail.com', photoURL: 'bb.com', role: 'Lecteur', friends: ['toto','Alice']);
+  final testUser1 = AppUser(uid: '1', username: 'Alice', email: 'a@mail.com', profilePicture: 'dd.com', role: 'Lecteur',);
+  final testUser2 = AppUser(uid: '2', username: 'Bob', email: 'bob@mail.com', profilePicture: 'bb.com', role: 'Lecteur', );
 
   setUp(() {
     mockContactService = MockContactService();

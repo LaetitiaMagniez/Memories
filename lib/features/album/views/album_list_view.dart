@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../../album/models/album_list_view_model.dart';
-import '../widget/album/album_management_bar.dart';
-import '../widget/album/grid/album_grid.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class AlbumListView extends StatefulWidget {
+import '../../../core/providers/app_provider.dart';
+import '../models/album.dart';
+import '../models/album_list_view_model.dart';
+import '../services/album_options_menu.dart';
+import '../widget/album/album_management_bar.dart';
+import '../widget/grid/album_grid.dart';
+
+class AlbumListView extends ConsumerStatefulWidget {
   const AlbumListView({super.key});
 
   @override
-  State<AlbumListView> createState() => _AlbumListViewState();
+  ConsumerState<AlbumListView> createState() => _AlbumListViewState();
 }
 
-class _AlbumListViewState extends State<AlbumListView> with TickerProviderStateMixin {
+class _AlbumListViewState extends ConsumerState<AlbumListView> with TickerProviderStateMixin {
   late TabController _tabController;
 
   @override
@@ -19,10 +23,8 @@ class _AlbumListViewState extends State<AlbumListView> with TickerProviderStateM
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
 
-    // Init ViewModel after widgets are ready
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final vm = Provider.of<AlbumListViewModel>(context, listen: false);
-      vm.init(); // sans tabController, on a retiré cela du VM
+      ref.read(albumListViewModelProvider).init();
     });
   }
 
@@ -34,24 +36,23 @@ class _AlbumListViewState extends State<AlbumListView> with TickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
-    final vm = Provider.of<AlbumListViewModel>(context);
+    final vm = ref.watch(albumListViewModelProvider);
 
-    if (vm.isLoading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
-
-    final user = vm.currentUser;
-    if (user == null) {
-      return const Scaffold(body: Center(child: Text("Utilisateur non connecté")));
+    if (vm.isLoading || vm.currentUser == null) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
     }
 
     return Scaffold(
       appBar: vm.isManaging
           ? AlbumManagementBar(
-        albumService: vm.albumService,
+        albumDialog: vm.albumDialogs,
         onExitManaging: vm.exitManaging,
         onSelectionCleared: vm.clearSelection,
         onUpdate: vm.refresh,
+        selectedAlbums: vm.albumSelectionNotifier.selectedItems,
+        albumSelectionNotifier: vm.albumSelectionNotifier,
       )
           : AppBar(
         title: const Text("Albums"),
@@ -63,51 +64,60 @@ class _AlbumListViewState extends State<AlbumListView> with TickerProviderStateM
           ],
         ),
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          StreamBuilder(
-            stream: vm.myAlbumsStream,
-            builder: (_, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              if (snapshot.hasError || snapshot.data == null || snapshot.data!.isEmpty) {
-                return const Center(child: Text("Pas encore d'albums souvenirs, rajoutez en !"));
-              }
-              return AlbumGrid(
-                albums: snapshot.data!,
-                isManaging: vm.isManaging,
-                albumService: vm.albumService,
-                onSelectionChanged: vm.refresh,
-              );
-            },
-          ),
-          StreamBuilder(
-            stream: vm.sharedAlbumsStream,
-            builder: (_, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              if (snapshot.hasError || snapshot.data == null || snapshot.data!.isEmpty) {
-                return const Center(child: Text("Pas encore d'albums partagés avec vous"));
-              }
-              return AlbumGrid(
-                albums: snapshot.data!,
-                isManaging: vm.isManaging,
-                albumService: vm.albumService,
-                onSelectionChanged: vm.refresh,
-              );
-            },
-          ),
-        ],
-      ),
-      floatingActionButton: vm.isManaging
-          ? null
-          : FloatingActionButton(
-        onPressed: () => vm.onAddAlbum(context),
-        child: const Icon(Icons.add),
-      ),
+        body: TabBarView(
+          controller: _tabController,
+          children: [
+            _buildAlbumStream(vm.myAlbumsStream, "Pas encore d'albums souvenirs, rajoutez-en !", vm),
+            _buildAlbumStream(vm.sharedAlbumsStream, "Pas encore d'albums partagés avec vous", vm),
+          ],
+        ),
+        floatingActionButton: vm.isManaging
+            ? null
+            :
+        FloatingActionButton(
+          onPressed: () async {
+            final albumOptionsMenu = AlbumOptionsMenu();
+            await albumOptionsMenu.showOptions(
+              context,
+              ref,
+              vm.albumSelectionNotifier.selectedItems.toList(),
+              vm.OnManageMode,
+              onManageAlbums: vm.enterManaging,
+              onAlbumsDeleted: vm.exitManaging,
+              onAlbumRenamed: vm.refresh,
+              refreshUI: vm.refresh,
+            );
+          },
+          child: const Icon(Icons.add),
+        ),
+    );
+  }
+
+  Widget _buildAlbumStream(Stream<List<Album>> stream, String emptyMessage, AlbumListViewModel vm) {
+    return StreamBuilder<List<Album>>(
+      stream: stream,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(child: Text('Pas encore de souvenirs partagés avec vous'));
+        }
+
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return Center(
+            child: Text(
+              "Pas encore d'albums souvenirs, rajoutez en !",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+          );
+        }
+        return AlbumGrid(
+          albums: snapshot.data!,
+          isManaging: vm.isManaging,
+        );
+      },
     );
   }
 }

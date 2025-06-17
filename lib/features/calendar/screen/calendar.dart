@@ -8,6 +8,8 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
+import '../../../core/notifiers/selected_items_notifier.dart';
+
 
 
 class CalendarPage extends StatefulWidget {
@@ -35,7 +37,12 @@ class _CalendarPageState extends State<CalendarPage> {
   }
 
   void _loadMemories() {
-    final MemoriesCrudService memoriesCrudService = MemoriesCrudService();
+    final SelectedItemsNotifier<Memory> selectionNotifier = SelectedItemsNotifier<Memory>();
+
+    late final MemoriesCrudService memoriesCrudService = MemoriesCrudService(
+      memoriesSelectionNotifier: selectionNotifier,
+    );
+
     memoriesCrudService.getAllMemoriesForUser().listen((newMemories) {
       setState(() {
         memories = _groupMemoriesByDate(newMemories);

@@ -1,15 +1,21 @@
 import 'package:flutter/material.dart';
-import '../../../memories/logic/album/album_service.dart';
+import '../../../../core/notifiers/selected_items_notifier.dart'; // <-- utilise ça
+import '../../models/album.dart';
+import '../../services/album_dialogs.dart';
 
 class AlbumManagementBar extends StatelessWidget implements PreferredSizeWidget {
-  final AlbumService albumService;
+  final AlbumDialogs albumDialog;
+  final List<Album> selectedAlbums;
+  final SelectedItemsNotifier<Album> albumSelectionNotifier;
   final VoidCallback onExitManaging;
   final VoidCallback onSelectionCleared;
   final VoidCallback onUpdate;
 
   const AlbumManagementBar({
     super.key,
-    required this.albumService,
+    required this.albumDialog,
+    required this.selectedAlbums,
+    required this.albumSelectionNotifier, // <-- Correction ici
     required this.onExitManaging,
     required this.onSelectionCleared,
     required this.onUpdate,
@@ -23,22 +29,24 @@ class AlbumManagementBar extends StatelessWidget implements PreferredSizeWidget 
     return AppBar(
       title: const Text("Gérer les albums"),
       actions: [
-        if (albumService.selectedAlbums.length == 1)
+        if (selectedAlbums.length == 1)
           IconButton(
             icon: const Icon(Icons.edit),
             tooltip: "Renommer l'album",
             onPressed: () {
-              albumService.renameAlbum(context, albumService.selectedAlbums.first);
+              albumDialog.renameAlbum(context, selectedAlbums.first);
             },
           ),
-        if (albumService.selectedAlbums.isNotEmpty)
+        if (selectedAlbums.isNotEmpty)
           IconButton(
             icon: const Icon(Icons.delete),
             tooltip: "Supprimer",
-            onPressed: () {
-              albumService.confirmDeleteSelectedAlbums(context, () {
-                onUpdate();
-              });
+            onPressed: () async {
+              await albumDialog.confirmDeleteSelectedAlbums(
+                context,
+                albumSelectionNotifier, // <-- Correction ici
+                onUpdate,
+              );
             },
           ),
         IconButton(

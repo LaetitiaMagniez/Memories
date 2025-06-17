@@ -9,8 +9,10 @@ import 'package:memories_project/core/services/media_service.dart';
 import 'package:memories_project/core/widgets/loading/loading_screen.dart';
 import 'package:memories_project/core/models/stats/stat_card.dart';
 import 'package:memories_project/features/user/services/user_service.dart';
-import '../../../../core/notifiers/theme_notifier.dart';
+import '../../../../core/providers/app_provider.dart';
+import '../../../memories/views/all_memories_list.dart';
 import '../friends_page.dart';
+
 
 class ProfilePageMobile extends ConsumerStatefulWidget {
   const ProfilePageMobile({super.key});
@@ -226,7 +228,19 @@ class _ProfilePageMobileState extends ConsumerState<ProfilePageMobile> {
       children: [
         StatCard(title: 'Mes albums', count: _albumCount, color: Colors.purple),
         StatCard(title: 'Albums collaboratifs', count: _sharedAlbumCount, color: Colors.purpleAccent),
-        StatCard(title: 'Mes souvenirs', count: _memoriesCount, color: Colors.deepPurple),
+
+        // 👉 Version avec InkWell + ripple effect
+        InkWell(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => AllMemoriesPage()),
+            );
+          },
+          borderRadius: BorderRadius.circular(12), // optionnel pour arrondir le ripple
+          child: StatCard(title: 'Mes souvenirs', count: _memoriesCount, color: Colors.deepPurple),
+        ),
+
         StatCard(title: 'Souvenirs partagés', count: _sharedMemoriesCount, color: Colors.deepPurpleAccent),
       ],
     );

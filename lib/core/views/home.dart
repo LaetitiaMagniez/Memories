@@ -3,8 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:memories_project/features/calendar/screen/calendar.dart';
 import 'package:memories_project/features/map/screens/map.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../features/album/views/album_list_view.dart';
-import '../features/user/views/profile/profile_page.dart';
+import '../../features/album/views/album_list_view.dart';
+import '../../features/user/views/profile/profile_page.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});

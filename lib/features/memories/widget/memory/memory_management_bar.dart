@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
-import '../../logic/memories/memories_service.dart';
+import '../../../../core/notifiers/selected_items_notifier.dart';
+import '../../models/memory.dart';
+import '../../services/memories_crud_service.dart';
 
 class ManagementBar extends StatelessWidget {
-  final MemoriesService memoriesService;
-  final VoidCallback onMove;
-  final VoidCallback onDelete;
-  final VoidCallback onCancel;
+  final MemoriesCrudService memoriesCrudService;
+  final SelectedItemsNotifier<Memory> memoriesSelectionNotifier;
 
   const ManagementBar({
     super.key,
-    required this.memoriesService,
-    required this.onMove,
-    required this.onDelete,
-    required this.onCancel,
+    required this.memoriesCrudService,
+    required this.memoriesSelectionNotifier,
   });
 
   @override
@@ -23,28 +21,28 @@ class ManagementBar extends StatelessWidget {
       color: Colors.white,
       child: Row(
         children: [
-          Expanded(
-            child: const Text(
+          const Expanded(
+            child: Text(
               "Touchez un ou plusieurs souvenirs pour les gérer (déplacer ou supprimer).",
               style: TextStyle(fontSize: 14),
             ),
           ),
-          if (memoriesService.selectedMemories.isNotEmpty) ...[
+          if (memoriesSelectionNotifier.selectedItems.isNotEmpty) ...[
             IconButton(
               icon: const Icon(Icons.move_to_inbox),
               tooltip: "Déplacer",
-              onPressed: onMove,
+              onPressed: () => memoriesCrudService.onMove(context),
             ),
             IconButton(
               icon: const Icon(Icons.delete),
               tooltip: "Supprimer",
-              onPressed: onDelete,
+              onPressed: () => memoriesCrudService.onDelete(context),
             ),
           ],
           IconButton(
             icon: const Icon(Icons.close),
             tooltip: "Annuler",
-            onPressed: onCancel,
+            onPressed: memoriesCrudService.onCancel,
           ),
         ],
       ),
