@@ -26,6 +26,9 @@ jobs:
       - name: Install Dependencies
         run: flutter pub get
 
+      - name: Make generate_dummy_env.sh executable
+        run: chmod +x generate_dummy_env.sh
+
       - name: Generate dummy env.dart
         run: ./generate_dummy_env.sh
 
