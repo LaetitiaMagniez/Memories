@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../app/home.dart';
+import '../../../core/views/home.dart';
 import '../../../core/services/authentification_service.dart';
+import '../../../core/widgets/authentification/social_login_buttons.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -224,6 +225,10 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                   ),
                   child: const Text("S'inscrire"),
+                ),
+                SocialLoginButtons(
+                  onGooglePressed: () => authentificationService.signInWithGoogle(context),
+                  onFacebookPressed: () => authentificationService.signInWithFacebook(context),
                 ),
                 const SizedBox(height: 16),
                 TextButton(

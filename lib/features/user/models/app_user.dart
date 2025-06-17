@@ -2,39 +2,35 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AppUser {
   final String uid;
-  final String displayName;
+  final String username;
   final String email;
-  final String photoURL;
+  final String profilePicture;
   final String role;
-  final List<String> friends; // Liste des ID des amis
 
   AppUser({
     required this.uid,
-    required this.displayName,
+    required this.username,
     required this.email,
-    required this.photoURL,
+    required this.profilePicture,
     required this.role,
-    required this.friends,
   });
 
   factory AppUser.fromDocument(DocumentSnapshot doc) {
     return AppUser(
       uid: doc.id,
-      displayName: doc['displayName'],
+      username: doc['username'],
       email: doc['email'],
-      photoURL: doc['photoURL'],
+      profilePicture: doc['profilePicture'],
       role: doc['role'],
-      friends: List<String>.from(doc['friends'] ?? []),
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
-      'displayName': displayName,
+      'username': username,
       'email': email,
-      'photoURL': photoURL,
+      'profilePicture': profilePicture,
       'role': role,
-      'friends': friends,
     };
   }
 }

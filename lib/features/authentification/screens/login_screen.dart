@@ -2,8 +2,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart'; // Pour kIsWeb
 import 'package:flutter/material.dart';
 import 'package:memories_project/features/authentification/password/forgotten_password.dart';
-import '../../../app/home.dart';
+import '../../../core/views/home.dart';
 import '../../../core/services/authentification_service.dart';
+import '../../../core/widgets/authentification/social_login_buttons.dart';
 
 // Aucune import à modifier
 
@@ -204,6 +205,10 @@ class _LoginState extends State<Login> {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
                     child: const Text('Se connecter'),
+                  ),
+                  SocialLoginButtons(
+                    onGooglePressed: () => authentificationService.signInWithGoogle(context),
+                    onFacebookPressed: () => authentificationService.signInWithFacebook(context),
                   ),
                   if (_isBiometricAvailable)
                     const Padding(

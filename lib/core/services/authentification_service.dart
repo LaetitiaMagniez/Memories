@@ -1,12 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:local_auth/local_auth.dart';
-import '../../features/user/logic/contact_service.dart';
-import '../../features/user/screens/profile_page.dart';
-import '../widgets/loading_screen.dart';
+import '../views/home.dart';
+import '../../features/user/services/contact_service.dart';
+import '../../features/user/views/profile/profile_page.dart';
+import '../widgets/loading/loading_screen.dart';
 
 class AuthentificationService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -220,5 +223,52 @@ class AuthentificationService {
       'profilePicture': null,
       'role': 'Propriétaire'
     });
+  }
+
+  // Connexion via les réseaux sociaux
+  Future<void> signInWithGoogle(BuildContext context) async {
+    final googleUser = await GoogleSignIn().signIn();
+    if (googleUser == null) return;
+
+    final googleAuth = await googleUser.authentication;
+    final credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
+
+    await _auth.signInWithCredential(credential);
+  }
+
+  Future<void> signInWithFacebook(BuildContext context) async {
+    try {
+      final LoginResult result = await FacebookAuth.instance.login();
+
+      if (result.status == LoginStatus.success) {
+        final accessToken = result.accessToken;
+        final credential = FacebookAuthProvider.credential(accessToken as String);
+
+        await FirebaseAuth.instance.signInWithCredential(credential);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Connexion Facebook réussie')),
+        );
+
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => HomeScreen()),
+        );
+      } else if (result.status == LoginStatus.cancelled) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Connexion Facebook annulée')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erreur Facebook: ${result.message}')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erreur Facebook: $e')),
+      );
+    }
   }
 }
