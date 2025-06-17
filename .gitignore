@@ -61,9 +61,9 @@ android/app/.cxx/
 key.properties
 **/*.keystore
 **/*.jks
-.env.android
+.env.android*
 local.properties
-
+env.dart
 
 # Web specific
 **/web/firebase-config.js
@@ -75,3 +75,7 @@ local.properties
 memories.json
 .firebaserc
 .firebase/
+
+# test
+test/**.mocks.dart
+

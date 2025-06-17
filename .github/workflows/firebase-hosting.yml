@@ -26,6 +26,12 @@ jobs:
       - name: Install Dependencies
         run: flutter pub get
 
+      - name: Make generate_dummy_env.sh executable
+        run: chmod +x generate_dummy_env.sh
+
+      - name: Generate dummy env.dart
+        run: ./generate_dummy_env.sh
+
       - name: Build Flutter Web
         run: flutter build web --release
 
@@ -41,6 +47,11 @@ jobs:
         run: |
           echo "GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }}" >> $GITHUB_ENV
           echo "NINJA_API_KEY=${{ secrets.NINJA_API_KEY }}" >> $GITHUB_ENV
+
+      - name: Replace API Keys in index.html
+        run: |
+          sed -i "s|__GOOGLE_API_KEY__|${GOOGLE_API_KEY}|g" build/web/index.html
+          sed -i "s|__NINJA_API_KEY__|${NINJA_API_KEY}|g" build/web/index.html
 
       - name: Deploy to Firebase Hosting
         run: firebase deploy --only hosting --project memories-7bdc6
