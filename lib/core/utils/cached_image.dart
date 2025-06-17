@@ -20,9 +20,10 @@ class CachedImage extends StatelessWidget {
   });
 
   @override
+  @override
   Widget build(BuildContext context) {
     return FutureBuilder<String>(
-      future: getCachedFilePath(url, extension: 'jpg'),
+      future: getCachedFilePath(url),  // Retirer `extension: 'jpg'`
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Shimmer.fromColors(

@@ -81,7 +81,6 @@ class MediaService {
     return await snapshot.ref.getDownloadURL();
   }
 
-  // ---------- Méthode principale ----------
   Future<String?> pickAndUploadMedia({
     required BuildContext context,
     required String albumId,

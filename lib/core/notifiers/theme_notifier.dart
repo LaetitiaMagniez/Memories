@@ -2,22 +2,28 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class ThemeNotifier extends StateNotifier<ThemeMode> {
-  static const _themeKey = 'theme_mode';
-  final SharedPreferences prefs;
+final themeNotifierProvider = AsyncNotifierProvider<ThemeAsyncNotifier, ThemeMode>(
+  ThemeAsyncNotifier.new,
+);
 
-  ThemeNotifier(this.prefs) : super(ThemeMode.system) {
-    _loadThemeFromPrefs();
+class ThemeAsyncNotifier extends AsyncNotifier<ThemeMode> {
+  static const _themeKey = 'theme_mode';
+  late SharedPreferences _prefs;
+
+  @override
+  Future<ThemeMode> build() async {
+    _prefs = await SharedPreferences.getInstance();
+    return _loadThemeFromPrefs();
   }
 
-  void _loadThemeFromPrefs() {
-    final themeStr = prefs.getString(_themeKey);
-    state = _stringToThemeMode(themeStr);
+  ThemeMode _loadThemeFromPrefs() {
+    final themeStr = _prefs.getString(_themeKey);
+    return _stringToThemeMode(themeStr);
   }
 
   Future<void> setThemeMode(ThemeMode mode) async {
-    state = mode;
-    await prefs.setString(_themeKey, _themeModeToString(mode));
+    state = AsyncData(mode);
+    await _prefs.setString(_themeKey, _themeModeToString(mode));
   }
 
   String _themeModeToString(ThemeMode mode) {
@@ -44,24 +50,3 @@ class ThemeNotifier extends StateNotifier<ThemeMode> {
     }
   }
 }
-
-// Provider pour SharedPreferences (asynchrone)
-final sharedPreferencesProvider = FutureProvider<SharedPreferences>((ref) async {
-  return SharedPreferences.getInstance();
-});
-
-// Provider du ThemeNotifier qui dépend de SharedPreferences
-final themeNotifierProvider =
-StateNotifierProvider<ThemeNotifier, ThemeMode>((ref) {
-  final prefsAsync = ref.watch(sharedPreferencesProvider);
-
-  return prefsAsync.when(
-    data: (prefs) => ThemeNotifier(prefs),
-    loading: () => ThemeNotifier(
-      // ici, tu peux fournir une instance fictive ou SharedPreferences.getInstance() synchronisé si tu en as une,
-      // ou créer un constructeur ThemeNotifier vide si tu veux gérer ce cas.
-        throw UnimplementedError('SharedPreferences not ready')),
-    error: (_, __) => ThemeNotifier(
-        throw UnimplementedError('Error loading SharedPreferences')),
-  );
-});

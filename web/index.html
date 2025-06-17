@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="FR">
 <head>
   <!--
     If you are serving your web app in a path other than the root, change the
@@ -34,6 +34,11 @@
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>
-  <script src="https://maps.googleapis.com/maps/api/js?key=${GOOGLE_API_KEY}"></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=__GOOGLE_API_KEY__&libraries=places" async defer></script>
+  <script>
+    window.env = {
+       NINJA_API_KEY: "__NINJA_API_KEY__"
+        , GOOGLE_API_KEY: "__GOOGLE_API_KEY__"
+     };  </script>
 </body>
 </html>

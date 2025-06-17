@@ -6,7 +6,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:local_auth/local_auth.dart';
-import '../../app/home.dart';
+import '../views/home.dart';
 import '../../features/user/services/contact_service.dart';
 import '../../features/user/views/profile/profile_page.dart';
 import '../widgets/loading/loading_screen.dart';

@@ -8,13 +8,15 @@ import 'package:memories_project/core/services/account_service.dart';
 import 'package:memories_project/core/widgets/loading/loading_screen.dart';
 import 'package:memories_project/core/models/stats/stat_card.dart';
 import '../../../../core/models/action_card_web.dart';
+import '../../../../core/models/stats/hoverable_stat_card_web.dart';
 import '../../../../core/models/stats/stat_card_web.dart';
 import '../../../../core/models/uploaded_image_result.dart';
+import '../../../../core/providers/app_provider.dart';
 import '../../../../core/services/media_service.dart';
+import '../../../memories/views/all_memories_list.dart';
 import '../../services/user_service.dart';
 import '../friends_page.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/notifiers/theme_notifier.dart';
 
 class ProfilePageWeb extends ConsumerStatefulWidget  {
   const ProfilePageWeb({super.key});
@@ -218,38 +220,42 @@ class _ProfilePageWebState extends ConsumerState<ProfilePageWeb> {
   Widget _buildStats() {
     final isWeb = kIsWeb;
 
-    final cards = [
-      {'title': 'Mes albums', 'count': _albumCount, 'color': Colors.purple},
-      {'title': 'Albums collaboratifs', 'count': _sharedAlbumCount, 'color': Colors.purpleAccent},
-      {'title': 'Mes souvenirs', 'count': _memoriesCount, 'color': Colors.deepPurple},
-      {'title': 'Souvenirs partagés', 'count': _sharedMemoriesCount, 'color': Colors.deepPurpleAccent},
-    ];
-
     if (isWeb) {
       return Wrap(
         spacing: 24,
         runSpacing: 24,
         alignment: WrapAlignment.center,
-        children: cards.map((card) => StatCardWeb(
-          title: card['title'] as String,
-          count: card['count'] as int,
-          color: card['color'] as Color,
-        )).toList(),
+        children: [
+          StatCardWeb(title: 'Mes albums', count: _albumCount, color: Colors.purple),
+          StatCardWeb(title: 'Albums collaboratifs', count: _sharedAlbumCount, color: Colors.purpleAccent),
+
+          HoverableStatCardWeb(
+            title: 'Mes souvenirs',
+            count: _memoriesCount,
+            color: Colors.deepPurple,
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => AllMemoriesPage()));
+            },
+          ),
+
+          StatCardWeb(title: 'Souvenirs partagés', count: _sharedMemoriesCount, color: Colors.deepPurpleAccent),
+        ],
       );
     } else {
-      // version mobile/tablette avec l'ancien StatCard
       return Wrap(
         spacing: 12,
         runSpacing: 12,
         alignment: WrapAlignment.center,
-        children: cards.map((card) => StatCard(
-          title: card['title'] as String,
-          count: card['count'] as int,
-          color: card['color'] as Color,
-        )).toList(),
+        children: [
+          StatCard(title: 'Mes albums', count: _albumCount, color: Colors.purple),
+          StatCard(title: 'Albums collaboratifs', count: _sharedAlbumCount, color: Colors.purpleAccent),
+          StatCard(title: 'Mes souvenirs', count: _memoriesCount, color: Colors.deepPurple),
+          StatCard(title: 'Souvenirs partagés', count: _sharedMemoriesCount, color: Colors.deepPurpleAccent),
+        ],
       );
     }
   }
+
 
   Widget _buildActionLinks(BuildContext context) {
     final isWeb = kIsWeb;

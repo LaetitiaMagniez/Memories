@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/notifiers/friends_notifier.dart';
-import '../../../core/providers/app_providers.dart';
+import '../../../core/providers/app_provider.dart';
 
 class FriendsPage extends ConsumerWidget {
   @override
@@ -38,8 +38,8 @@ class FriendsPage extends ConsumerWidget {
               itemBuilder: (context, index) {
                 final friend = friendsState.friends[index];
                 return ListTile(
-                  leading: friend.photoURL.isNotEmpty
-                      ? CircleAvatar(backgroundImage: NetworkImage(friend.photoURL))
+                  leading: friend.profilePicture.isNotEmpty
+                      ? CircleAvatar(backgroundImage: NetworkImage(friend.profilePicture))
                       : const CircleAvatar(child: Icon(Icons.person)),
                   title: Text(friend.username),
                   subtitle: Text('Role: ${friend.role}'),

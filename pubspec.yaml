@@ -74,6 +74,9 @@ dependencies:
   google_sign_in: ^6.3.0
   flutter_facebook_auth: ^7.1.2
   flutter_riverpod: ^2.6.1
+  web: ^1.1.1
+  chewie: ^1.11.3
+  connectivity_plus: ^6.1.4
 
 
 

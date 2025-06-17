@@ -1,24 +1,21 @@
 import 'package:flutter/material.dart';
-import '../../../logic/album/album_service.dart';
-import '../../../../album/models/album.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../models/album.dart';
 import 'album_grid_item.dart';
 
-class AlbumGrid extends StatelessWidget {
+class AlbumGrid extends ConsumerWidget {
   final List<Album> albums;
   final bool isManaging;
-  final AlbumService albumService;
-  final VoidCallback onSelectionChanged;
 
   const AlbumGrid({
     super.key,
     required this.albums,
     required this.isManaging,
-    required this.albumService,
-    required this.onSelectionChanged,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+
     if (albums.isEmpty) {
       return const Center(
         child: Text(
@@ -35,7 +32,7 @@ class AlbumGrid extends StatelessWidget {
         crossAxisCount: 3,
         crossAxisSpacing: 8.0,
         mainAxisSpacing: 8.0,
-        childAspectRatio: 1.0,
+        childAspectRatio: 0.8,
       ),
       itemCount: albums.length,
       itemBuilder: (context, index) {
@@ -44,8 +41,7 @@ class AlbumGrid extends StatelessWidget {
         return AlbumGridItem(
           album: album,
           isManaging: isManaging,
-          albumService: albumService,
-          onSelectionChanged: onSelectionChanged,
+
         );
       },
     );

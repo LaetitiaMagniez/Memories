@@ -1,29 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:memories_project/features/album/models/album.dart';
-import 'package:memories_project/features/memories/widget/video/video_thumbnail_widget.dart';
 import 'package:shimmer/shimmer.dart';
+
 import '../../../../core/utils/cached_image.dart';
+import '../../../memories/widget/video/video_thumbnail_widget.dart';
+import '../../models/album.dart';
 
 class AlbumCard extends StatelessWidget {
   final Album album;
-  final VoidCallback onTap;
 
   const AlbumCard({
     super.key,
     required this.album,
-    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _buildThumbnail(context),
-          const SizedBox(height: 6),
-          Text(
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _buildThumbnail(),
+        const SizedBox(height: 6),
+        Flexible(
+          child: Text(
             album.name,
             style: const TextStyle(
               fontWeight: FontWeight.bold,
@@ -33,7 +31,9 @@ class AlbumCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
           ),
-          Text(
+        ),
+        Flexible(
+          child: Text(
             '${album.itemCount} élément${album.itemCount == 1 ? '' : 's'}',
             style: const TextStyle(
               fontSize: 10,
@@ -43,19 +43,16 @@ class AlbumCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
-  Widget _buildThumbnail(BuildContext context) {
-    final double size = MediaQuery.of(context).size.width / 2 - 24;
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: SizedBox(
-        width: size,
-        height: size,
+  Widget _buildThumbnail() {
+    return AspectRatio(
+      aspectRatio: 1,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
         child: Hero(
           tag: 'albumThumbnail-${album.id}',
           child: _buildMediaContent(),
@@ -86,9 +83,7 @@ class AlbumCard extends StatelessWidget {
     return Shimmer.fromColors(
       baseColor: Colors.grey[300]!,
       highlightColor: Colors.grey[100]!,
-      child: Container(
-        color: Colors.white,
-      ),
+      child: Container(color: Colors.white),
     );
   }
 

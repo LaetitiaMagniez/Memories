@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../app/home.dart';
+import '../../../core/views/home.dart';
 import '../../../core/services/authentification_service.dart';
 import '../../../core/widgets/authentification/social_login_buttons.dart';
 
