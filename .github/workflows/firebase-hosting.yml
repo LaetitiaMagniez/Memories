@@ -26,6 +26,9 @@ jobs:
       - name: Install Dependencies
         run: flutter pub get
 
+      - name: Generate dummy env.dart
+        run: ./generate_dummy_env.sh
+
       - name: Build Flutter Web
         run: flutter build web --release
 
